@@ -255,8 +255,10 @@
       padding: 30px;
       border-radius: 8px;
       width: 90%;
-      max-width: 500px;
+      max-width: 550px;
       position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
     }
 
     .close-btn {
@@ -410,8 +412,8 @@
   <div id="adminModal" class="modal">
     <div class="modal-box">
       <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
-      <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-pen-to-square"></i> Painel da Redação - Publicar Notícia / Emissão</h3>
-      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Carregue novas notícias ou atualize o vídeo da transmissão ao vivo.</p>
+      <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-pen-to-square"></i> Painel da Redação - Publicar & Gestão</h3>
+      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Publique novos conteúdos ou limpe publicações antigas do site.</p>
       
       <form onsubmit="handlePublishNews(event)">
         <div class="form-group">
@@ -421,7 +423,7 @@
 
         <div class="form-group">
           <label>Link / ID do Vídeo do YouTube (Opcional para mudar a transmissão)</label>
-          <input type="text" id="videoUrl" placeholder="Ex: https://www.youtube.com/watch?v=CODIGO_DO_VIDEO ou só o código">
+          <input type="text" id="videoUrl" placeholder="Ex: https://www.youtube.com/watch?v=CODIGO_DO_VIDEO">
         </div>
         
         <div class="form-group">
@@ -437,11 +439,19 @@
 
         <div class="form-group">
           <label>Resumo / Conteúdo da Notícia</label>
-          <textarea id="newsContent" rows="4" placeholder="Escreva aqui o resumo da notícia..." required></textarea>
+          <textarea id="newsContent" rows="3" placeholder="Escreva aqui o resumo da notícia..." required></textarea>
         </div>
 
-        <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar Conteúdo no Site</button>
+        <button type="submit" class="btn btn-success" style="width: 100%; margin-bottom: 15px;"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar Conteúdo no Site</button>
       </form>
+
+      <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
+      
+      <h4 style="margin-bottom: 10px; font-size: 15px; color: var(--tgb-red);"><i class="fa-solid fa-trash-can"></i> Gerir Conteúdos Ativos</h4>
+      <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Clique em "Remover" para apagar imediatamente uma notícia do site:</p>
+      <div id="adminNewsList" style="max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 4px;">
+        <!-- Lista gerada automaticamente -->
+      </div>
     </div>
   </div>
 
@@ -467,9 +477,40 @@
 
       if (pass === "tgb2026") {
         closeModal('loginModal');
+        updateAdminNewsList();
         document.getElementById('adminModal').style.display = 'flex';
       } else {
         alert("Palavra-passe incorreta! Utilize: tgb2026");
+      }
+    }
+
+    function updateAdminNewsList() {
+      const listContainer = document.getElementById('adminNewsList');
+      listContainer.innerHTML = '';
+      const cards = document.querySelectorAll('.news-grid .news-card');
+
+      if (cards.length === 0) {
+        listContainer.innerHTML = '<p style="font-size:12px; color:#888;">Nenhuma notícia publicada.</p>';
+        return;
+      }
+
+      cards.forEach((card, index) => {
+        const title = card.querySelector('h3').textContent;
+        const itemDiv = document.createElement('div');
+        itemDiv.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px;";
+        itemDiv.innerHTML = `
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">${title}</span>
+          <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px;" onclick="removeCardAndRefresh(${index})">Remover</button>
+        `;
+        listContainer.appendChild(itemDiv);
+      });
+    }
+
+    function removeCardAndRefresh(index) {
+      const cards = document.querySelectorAll('.news-grid .news-card');
+      if (cards[index]) {
+        cards[index].remove();
+        updateAdminNewsList();
       }
     }
 
