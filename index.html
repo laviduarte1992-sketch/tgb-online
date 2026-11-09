@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TGB - Televisão da Guiné-Bissau | Ao Vivo</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Barra Topo -->
+  <header class="header">
+    <div class="top-bar">
+      <div class="container top-container">
+        <span class="live-badge"><i class="fa-solid fa-circle"></i> AO VIVO NA TGB</span>
+        <div class="date-time" id="current-date"></div>
+      </div>
+    </div>
+    
+    <!-- Navegação Principal -->
+    <nav class="nav-container container">
+      <div class="logo">
+        <div class="logo-box">
+          <span class="red">T</span><span class="yellow">G</span><span class="green">B</span>
+          <i class="fa-solid fa-star star-icon"></i>
+        </div>
+        <span class="logo-text">Televisão da Guiné-Bissau</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#em-direto" class="active">Em Direto</a></li>
+        <li><a href="#noticias">Notícias</a></li>
+        <li><a href="#programacao">Programação</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Secção Player Em Direto -->
+  <section id="em-direto" class="hero-stream container">
+    <div class="player-container">
+      <div class="video-placeholder">
+        <i class="fa-solid fa-play-circle play-icon"></i>
+        <p>Emissão Em Direto da TGB</p>
+        <span class="stream-status">Sinal Oficial de Bissau</span>
+      </div>
+    </div>
+    <div class="stream-info">
+      <h2>Telejornal Nacional - Edição Principal</h2>
+      <p>Acompanhe as principais notícias da Guiné-Bissau e do mundo em tempo real.</p>
+      <div class="share-buttons">
+        <button class="btn btn-primary"><i class="fa-solid fa-share-nodes"></i> Partilhar</button>
+        <button class="btn btn-secondary"><i class="fa-solid fa-bell"></i> Notificações</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Secção Notícias Recentes -->
+  <section id="noticias" class="news-section container">
+    <h2 class="section-title">Últimas Notícias</h2>
+    <div class="news-grid">
+      <article class="news-card">
+        <div class="news-img" style="background-color: #ddd;"></div>
+        <div class="news-content">
+          <span class="news-tag green-bg">Sociedade</span>
+          <h3>Modernização da Rede de Emissão em Bissau</h3>
+          <p>Novos equipamentos prometem expandir o sinal da TGB para todas as regiões do país.</p>
+        </div>
+      </article>
+
+      <article class="news-card">
+        <div class="news-img" style="background-color: #ccc;"></div>
+        <div class="news-content">
+          <span class="news-tag red-bg">Economia</span>
+          <h3>Desenvolvimento Agrícola e Exportações</h3>
+          <p>Balanço das novas medidas de apoio aos produtores locais guineenses.</p>
+        </div>
+      </article>
+
+      <article class="news-card">
+        <div class="news-img" style="background-color: #bbb;"></div>
+        <div class="news-content">
+          <span class="news-tag yellow-bg">Cultura</span>
+          <h3>Festival Cultural Nacional na Capital</h3>
+          <p>Música, dança e tradições guineenses em destaque este fim de semana.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Rodapé -->
+  <footer id="contacto" class="footer">
+    <div class="container footer-content">
+      <p>&copy; 2026 TGB - Televisão da Guiné-Bissau. Todos os direitos reservados.</p>
+      <p>República da Guiné-Bissau | Bissau</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
