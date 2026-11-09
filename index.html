@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TGB - Televisão da Guiné-Bissau | Ao Vivo</title>
+  <title>TGB - Televisão da Guiné-Bissau | Área Restrita</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -25,6 +25,40 @@
       background-color: var(--tgb-light);
       color: #333;
     }
+
+    /* Ecrã de Proteção Global (Bloqueio do Site) */
+    #globalLockScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--tgb-dark);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+    }
+
+    .lock-box {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .lock-logo {
+      font-size: 40px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .red { color: var(--tgb-red); }
+    .yellow { color: var(--tgb-yellow); }
+    .green { color: var(--tgb-green); }
 
     .container {
       width: 90%;
@@ -64,10 +98,6 @@
       position: relative;
       display: inline-block;
     }
-
-    .red { color: var(--tgb-red); }
-    .yellow { color: var(--tgb-yellow); }
-    .green { color: var(--tgb-green); }
 
     .star-icon {
       font-size: 14px;
@@ -291,6 +321,25 @@
 </head>
 <body>
 
+  <!-- ECRÃ DE BLOQUEIO GLOBAL (RESTRITO SÓ PARA TI) -->
+  <div id="globalLockScreen">
+    <div class="lock-box">
+      <div class="lock-logo">
+        <span class="red">T</span><span class="yellow">G</span><span class="green">B</span>
+      </div>
+      <h3 style="margin-bottom: 10px; color: var(--tgb-dark);">Acesso Privado / Restrito</h3>
+      <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Plataforma em fase de testes fechados (LAVI DUARTE INDEQUE).</p>
+      
+      <form onsubmit="handleGlobalUnlock(event)">
+        <div class="form-group" style="text-align: left;">
+          <label>Palavra-passe de Acesso:</label>
+          <input type="password" id="globalPassInput" placeholder="Insira a palavra-passe..." required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar no Portal</button>
+      </form>
+    </div>
+  </div>
+
   <header class="header">
     <div class="top-bar">
       <div class="container top-container">
@@ -459,6 +508,19 @@
       const today = new Date();
       dateElement.textContent = today.toLocaleDateString('pt-PT', options);
     });
+
+    // Palavra-passe global para desbloquear o site completo (podes alterar "tgb2026" se preferires outra)
+    function handleGlobalUnlock(event) {
+      event.preventDefault();
+      const pass = document.getElementById('globalPassInput').value;
+
+      if (pass === "tgb2026") {
+        document.getElementById('globalLockScreen').style.display = 'none';
+      } else {
+        alert("Palavra-passe incorreta! Acesso restrito apenas ao criador.");
+        document.getElementById('globalPassInput').value = '';
+      }
+    }
 
     function openModal() {
       document.getElementById('loginModal').style.display = 'flex';
