@@ -144,7 +144,7 @@
     .btn-primary { background: var(--tgb-red); color: white; }
     .btn-secondary { background: #e0e0e0; color: #333; }
     .btn-success { background: var(--tgb-green); color: white; }
-    .btn-danger { background: var(--tgb-red); color: white; padding: 5px 10px; font-size: 12px; margin-top: 10px; }
+    .btn-danger { background: var(--tgb-red); color: white; padding: 5px 10px; font-size: 12px; }
 
     .news-section { margin: 50px auto; }
     .section-title {
@@ -346,7 +346,6 @@
           <span class="news-tag green-bg">Sociedade</span>
           <h3>Modernização da Rede de Emissão em Bissau</h3>
           <p>Novos equipamentos prometem expandir o sinal da TGB para todas as regiões do país.</p>
-          <button class="btn btn-danger" onclick="this.closest('.news-card').remove()"><i class="fa-solid fa-trash"></i> Apagar Notícia</button>
         </div>
       </article>
 
@@ -356,7 +355,6 @@
           <span class="news-tag red-bg">Economia</span>
           <h3>Desenvolvimento Agrícola e Exportações</h3>
           <p>Balanço das novas medidas de apoio aos produtores locais guineenses.</p>
-          <button class="btn btn-danger" onclick="this.closest('.news-card').remove()"><i class="fa-solid fa-trash"></i> Apagar Notícia</button>
         </div>
       </article>
 
@@ -366,7 +364,6 @@
           <span class="news-tag yellow-bg" style="color:#000;">Cultura</span>
           <h3>Festival Cultural Nacional na Capital</h3>
           <p>Música, dança e tradições guineenses em destaque este fim de semana.</p>
-          <button class="btn btn-danger" onclick="this.closest('.news-card').remove()"><i class="fa-solid fa-trash"></i> Apagar Notícia</button>
         </div>
       </article>
 
@@ -509,61 +506,4 @@
     function removeCardAndRefresh(index) {
       const cards = document.querySelectorAll('.news-grid .news-card');
       if (cards[index]) {
-        cards[index].remove();
-        updateAdminNewsList();
-      }
-    }
-
-    function extractYouTubeId(url) {
-      if (!url) return null;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : url;
-    }
-
-    function handlePublishNews(event) {
-      event.preventDefault();
-      
-      const title = document.getElementById('newsTitle').value;
-      const category = document.getElementById('newsCategory').value;
-      const content = document.getElementById('newsContent').value;
-      const rawVideoUrl = document.getElementById('videoUrl').value.trim();
-      
-      if (rawVideoUrl !== '') {
-        const videoId = extractYouTubeId(rawVideoUrl);
-        document.getElementById('tgbPlayer').src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1`;
-        document.getElementById('streamTitle').textContent = title;
-        document.getElementById('streamDesc').textContent = content;
-      }
-
-      const newsGrid = document.getElementById('newsGrid');
-      const newCard = document.createElement('article');
-      newCard.className = 'news-card';
-      
-      let tagClass = 'green-bg';
-      let headerBg = 'green-bg';
-      if(category === 'Economia') { tagClass = 'red-bg'; headerBg = 'red-bg'; }
-      if(category === 'Cultura') { tagClass = 'yellow-bg'; headerBg = 'yellow-bg'; }
-
-      newCard.innerHTML = `
-        <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
-        <div class="news-content">
-          <span class="news-tag ${tagClass}">${category}</span>
-          <h3>${title}</h3>
-          <p>${content}</p>
-          <button class="btn btn-danger" onclick="this.closest('.news-card').remove()"><i class="fa-solid fa-trash"></i> Apagar Notícia</button>
-        </div>
-      `;
-
-      newsGrid.insertBefore(newCard, newsGrid.firstChild);
-      
-      alert("Conteúdo publicado com sucesso!");
-      closeModal('adminModal');
-      
-      document.getElementById('newsTitle').value = '';
-      document.getElementById('videoUrl').value = '';
-      document.getElementById('newsContent').value = '';
-    }
-  </script>
-</body>
-</html>
+        cards[index
