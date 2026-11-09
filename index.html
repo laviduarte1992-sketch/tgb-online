@@ -506,4 +506,60 @@
     function removeCardAndRefresh(index) {
       const cards = document.querySelectorAll('.news-grid .news-card');
       if (cards[index]) {
-        cards[index
+        cards[index].remove();
+        updateAdminNewsList();
+      }
+    }
+
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : url;
+    }
+
+    function handlePublishNews(event) {
+      event.preventDefault();
+      
+      const title = document.getElementById('newsTitle').value;
+      const category = document.getElementById('newsCategory').value;
+      const content = document.getElementById('newsContent').value;
+      const rawVideoUrl = document.getElementById('videoUrl').value.trim();
+      
+      if (rawVideoUrl !== '') {
+        const videoId = extractYouTubeId(rawVideoUrl);
+        document.getElementById('tgbPlayer').src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1`;
+        document.getElementById('streamTitle').textContent = title;
+        document.getElementById('streamDesc').textContent = content;
+      }
+
+      const newsGrid = document.getElementById('newsGrid');
+      const newCard = document.createElement('article');
+      newCard.className = 'news-card';
+      
+      let tagClass = 'green-bg';
+      let headerBg = 'green-bg';
+      if(category === 'Economia') { tagClass = 'red-bg'; headerBg = 'red-bg'; }
+      if(category === 'Cultura') { tagClass = 'yellow-bg'; headerBg = 'yellow-bg'; }
+
+      newCard.innerHTML = `
+        <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
+        <div class="news-content">
+          <span class="news-tag ${tagClass}">${category}</span>
+          <h3>${title}</h3>
+          <p>${content}</p>
+        </div>
+      `;
+
+      newsGrid.insertBefore(newCard, newsGrid.firstChild);
+      
+      alert("Conteúdo publicado com sucesso!");
+      closeModal('adminModal');
+      
+      document.getElementById('newsTitle').value = '';
+      document.getElementById('videoUrl').value = '';
+      document.getElementById('newsContent').value = '';
+    }
+  </script>
+</body>
+</html>
