@@ -32,6 +32,7 @@
       margin: 0 auto;
     }
 
+    /* Topo & Navegação */
     .top-bar {
       background-color: var(--tgb-dark);
       color: white;
@@ -102,6 +103,7 @@
       color: var(--tgb-red);
     }
 
+    /* Video Hero */
     .hero-stream {
       margin: 30px auto;
       background: white;
@@ -143,7 +145,9 @@
 
     .btn-primary { background: var(--tgb-red); color: white; }
     .btn-secondary { background: #e0e0e0; color: #333; }
+    .btn-success { background: var(--tgb-green); color: white; }
 
+    /* Notícias */
     .news-section { margin: 50px auto; }
     .section-title {
       border-left: 5px solid var(--tgb-green);
@@ -183,6 +187,7 @@
     .news-card h3 { margin: 10px 0; font-size: 18px; }
     .news-card p { font-size: 14px; color: #666; line-height: 1.4; }
 
+    /* Rodapé */
     .footer {
       background: var(--tgb-dark);
       color: white;
@@ -212,9 +217,7 @@
       transition: 0.2s;
     }
 
-    .footer-links a:hover {
-      color: white;
-    }
+    .footer-links a:hover { color: white; }
 
     .admin-link {
       background: rgba(255, 255, 255, 0.1);
@@ -236,6 +239,7 @@
       font-weight: bold;
     }
 
+    /* Modais */
     .modal {
       display: none;
       position: fixed;
@@ -254,7 +258,7 @@
       padding: 30px;
       border-radius: 8px;
       width: 90%;
-      max-width: 400px;
+      max-width: 500px;
       position: relative;
     }
 
@@ -278,7 +282,7 @@
       color: #333;
     }
 
-    .form-group input {
+    .form-group input, .form-group select, .form-group textarea {
       width: 100%;
       padding: 10px;
       border: 1px solid #ccc;
@@ -288,6 +292,7 @@
 </head>
 <body>
 
+  <!-- Barra de Topo -->
   <header class="header">
     <div class="top-bar">
       <div class="container top-container">
@@ -313,6 +318,7 @@
     </nav>
   </header>
 
+  <!-- Transmissão em Direto -->
   <section id="em-direto" class="hero-stream container">
     <div class="player-container">
       <iframe 
@@ -332,9 +338,10 @@
     </div>
   </section>
 
+  <!-- Grelha de Notícias -->
   <section id="noticias" class="news-section container">
     <h2 class="section-title">Últimas Notícias</h2>
-    <div class="news-grid">
+    <div class="news-grid" id="newsGrid">
       <article class="news-card">
         <div class="news-img red-bg" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">TGB NEWS</div>
         <div class="news-content">
@@ -364,6 +371,7 @@
     </div>
   </section>
 
+  <!-- Rodapé -->
   <footer id="contacto" class="footer">
     <div class="container footer-content">
       <p>&copy; 2026 TGB - Televisão da Guiné-Bissau. Todos os direitos reservados.</p>
@@ -380,9 +388,10 @@
     </div>
   </footer>
 
+  <!-- Modal de Login -->
   <div id="loginModal" class="modal">
     <div class="modal-box">
-      <span class="close-btn" onclick="closeModal()">&times;</span>
+      <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
       <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-user-shield"></i> Acesso à Redação TGB</h3>
       <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Insira as credenciais de funcionário para gerir conteúdos.</p>
       
@@ -400,6 +409,40 @@
     </div>
   </div>
 
+  <!-- Modal do Painel de Publicação de Notícias (Painel da Redação) -->
+  <div id="adminModal" class="modal">
+    <div class="modal-box">
+      <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
+      <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-pen-to-square"></i> Painel da Redação - Publicar Notícia</h3>
+      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Carregue novas notícias para serem exibidas na página principal do site.</p>
+      
+      <form onsubmit="handlePublishNews(event)">
+        <div class="form-group">
+          <label>Título da Notícia</label>
+          <input type="text" id="newsTitle" placeholder="Ex: Inauguração do novo centro de saúde em Bissau" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="newsCategory" required>
+            <option value="Sociedade">Sociedade</option>
+            <option value="Economia">Economia</option>
+            <option value="Cultura">Cultura</option>
+            <option value="Desporto">Desporto</option>
+            <option value="Política">Política</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Resumo / Conteúdo da Notícia</label>
+          <textarea id="newsContent" rows="4" placeholder="Escreva aqui o resumo da notícia..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar Notícia no Site</button>
+      </form>
+    </div>
+  </div>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const dateElement = document.getElementById("current-date");
@@ -412,22 +455,60 @@
       document.getElementById('loginModal').style.display = 'flex';
     }
 
-    function closeModal() {
-      document.getElementById('loginModal').style.display = 'none';
+    function closeModal(modalId) {
+      document.getElementById(modalId).style.display = 'none';
     }
 
     function handleLogin(event) {
       event.preventDefault();
-      const user = document.getElementById('loginUser').value;
       const pass = document.getElementById('loginPass').value;
 
-      // Palavra-passe configurada para teste/apresentação
       if (pass === "tgb2026") {
-        alert("Login efetuado com sucesso! Bem-vindo ao painel de gestão da TGB, " + user);
-        closeModal();
+        closeModal('loginModal');
+        // Abre diretamente o Painel de Publicação de Notícias
+        document.getElementById('adminModal').style.display = 'flex';
       } else {
-        alert("Palavra-passe incorreta! Para teste, utilize a palavra-passe: tgb2026");
+        alert("Palavra-passe incorreta! Utilize: tgb2026");
       }
+    }
+
+    function handlePublishNews(event) {
+      event.preventDefault();
+      
+      const title = document.getElementById('newsTitle').value;
+      const category = document.getElementById('newsCategory').value;
+      const content = document.getElementById('newsContent').value;
+      
+      // Criar nova carta de notícia
+      const newsGrid = document.getElementById('newsGrid');
+      const newCard = document.createElement('article');
+      newCard.className = 'news-card';
+      
+      // Cores por categoria
+      let tagClass = 'green-bg';
+      let headerBg = 'green-bg';
+      if(category === 'Economia') { tagClass = 'red-bg'; headerBg = 'red-bg'; }
+      if(category === 'Cultura') { tagClass = 'yellow-bg'; headerBg = 'yellow-bg'; }
+      if(category === 'Desporto') { tagClass = 'green-bg'; headerBg = 'green-bg'; }
+
+      newCard.innerHTML = `
+        <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">TGB NEWS</div>
+        <div class="news-content">
+          <span class="news-tag ${tagClass}">${category}</span>
+          <h3>${title}</h3>
+          <p>${content}</p>
+        </div>
+      `;
+
+      // Inserir a nova notícia no início da grelha
+      newsGrid.insertBefore(newCard, newsGrid.firstChild);
+      
+      alert("Notícia publicada com sucesso no portal!");
+      closeModal('adminModal');
+      
+      // Limpar formulário
+      document.getElementById('newsTitle').value = '';
+      document.getElementById('newsContent').value = '';
     }
   </script>
 </body>
