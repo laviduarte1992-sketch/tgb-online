@@ -114,16 +114,13 @@
       background: black;
       width: 100%;
       height: 480px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       position: relative;
     }
 
-    video {
+    .player-container iframe {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      border: 0;
     }
 
     .stream-info {
@@ -225,11 +222,13 @@
 
   <section id="em-direto" class="hero-stream container">
     <div class="player-container">
-      <!-- Leitor de Vídeo Funcional para Demonstração -->
-      <video controls poster="https://via.placeholder.com/1200x600/121212/FFFFFF?text=TGB+Ao+Vivo+-+Emissao+Nacional">
-        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-        O seu navegador não suporta a reprodução de vídeo.
-      </video>
+      <!-- Leitor de vídeo demonstrativo que reproduz automaticamente -->
+      <iframe 
+        src="https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&mute=1&loop=1&controls=1" 
+        title="TGB Emissão em Direto" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+      </iframe>
     </div>
     <div class="stream-info">
       <h2>Telejornal Nacional - Edição Principal</h2>
