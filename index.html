@@ -144,6 +144,7 @@
     .btn-primary { background: var(--tgb-red); color: white; }
     .btn-secondary { background: #e0e0e0; color: #333; }
     .btn-success { background: var(--tgb-green); color: white; }
+    .btn-danger { background: var(--tgb-red); color: white; padding: 5px 10px; font-size: 12px; margin-top: 10px; }
 
     .news-section { margin: 50px auto; }
     .section-title {
@@ -163,6 +164,7 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      position: relative;
     }
 
     .news-img { height: 180px; }
@@ -342,6 +344,7 @@
           <span class="news-tag green-bg">Sociedade</span>
           <h3>Modernização da Rede de Emissão em Bissau</h3>
           <p>Novos equipamentos prometem expandir o sinal da TGB para todas as regiões do país.</p>
+          <button class="btn btn-danger" onclick="this.closest('.news-card').remove()"><i class="fa-solid fa-trash"></i> Apagar Notícia</button>
         </div>
       </article>
 
@@ -351,6 +354,7 @@
           <span class="news-tag red-bg">Economia</span>
           <h3>Desenvolvimento Agrícola e Exportações</h3>
           <p>Balanço das novas medidas de apoio aos produtores locais guineenses.</p>
+          <button class="btn btn-danger" onclick="this.closest('.news-card').remove()"><i class="fa-solid fa-trash"></i> Apagar Notícia</button>
         </div>
       </article>
 
@@ -360,6 +364,7 @@
           <span class="news-tag yellow-bg" style="color:#000;">Cultura</span>
           <h3>Festival Cultural Nacional na Capital</h3>
           <p>Música, dança e tradições guineenses em destaque este fim de semana.</p>
+          <button class="btn btn-danger" onclick="this.closest('.news-card').remove()"><i class="fa-solid fa-trash"></i> Apagar Notícia</button>
         </div>
       </article>
 
@@ -483,7 +488,6 @@
       const content = document.getElementById('newsContent').value;
       const rawVideoUrl = document.getElementById('videoUrl').value.trim();
       
-      // Se preencherem um link de vídeo, atualiza o leitor principal
       if (rawVideoUrl !== '') {
         const videoId = extractYouTubeId(rawVideoUrl);
         document.getElementById('tgbPlayer').src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1`;
@@ -491,7 +495,6 @@
         document.getElementById('streamDesc').textContent = content;
       }
 
-      // Adiciona o cartão da notícia à grelha
       const newsGrid = document.getElementById('newsGrid');
       const newCard = document.createElement('article');
       newCard.className = 'news-card';
@@ -507,6 +510,7 @@
           <span class="news-tag ${tagClass}">${category}</span>
           <h3>${title}</h3>
           <p>${content}</p>
+          <button class="btn btn-danger" onclick="this.closest('.news-card').remove()"><i class="fa-solid fa-trash"></i> Apagar Notícia</button>
         </div>
       `;
 
