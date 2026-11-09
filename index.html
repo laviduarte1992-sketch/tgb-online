@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TGB - Televisão da Guiné-Bissau | Ao Vivo</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- SDK do Supabase para JS em tempo real -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --tgb-red: #E31B23;
@@ -333,10 +331,38 @@
     </div>
   </section>
 
+  <!-- Grelha das ÚLTIMAS NOTÍCIAS (As cores oficiais Vermelho, Amarelo e Verde) -->
   <section id="noticias" class="news-section container">
     <h2 class="section-title">Últimas Notícias</h2>
     <div class="news-grid" id="newsGrid">
-      <!-- As notícias serão carregadas automaticamente do Supabase -->
+      
+      <article class="news-card">
+        <div class="news-img red-bg" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
+        <div class="news-content">
+          <span class="news-tag green-bg">Sociedade</span>
+          <h3>Modernização da Rede de Emissão em Bissau</h3>
+          <p>Novos equipamentos prometem expandir o sinal da TGB para todas as regiões do país.</p>
+        </div>
+      </article>
+
+      <article class="news-card">
+        <div class="news-img yellow-bg" style="display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold; font-size:24px;">TGB NEWS</div>
+        <div class="news-content">
+          <span class="news-tag red-bg">Economia</span>
+          <h3>Desenvolvimento Agrícola e Exportações</h3>
+          <p>Balanço das novas medidas de apoio aos produtores locais guineenses.</p>
+        </div>
+      </article>
+
+      <article class="news-card">
+        <div class="news-img green-bg" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
+        <div class="news-content">
+          <span class="news-tag yellow-bg" style="color:#000;">Cultura</span>
+          <h3>Festival Cultural Nacional na Capital</h3>
+          <p>Música, dança e tradições guineenses em destaque este fim de semana.</p>
+        </div>
+      </article>
+
     </div>
   </section>
 
@@ -356,6 +382,7 @@
     </div>
   </footer>
 
+  <!-- Modal de Login -->
   <div id="loginModal" class="modal">
     <div class="modal-box">
       <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
@@ -376,11 +403,12 @@
     </div>
   </div>
 
+  <!-- Modal do Painel da Redação para Publicar Notícia -->
   <div id="adminModal" class="modal">
     <div class="modal-box">
       <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
       <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-pen-to-square"></i> Painel da Redação - Publicar Notícia</h3>
-      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Carregue novas notícias para ficarem salvas permanentemente no Supabase.</p>
+      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Carregue novas notícias para serem exibidas na página principal do site.</p>
       
       <form onsubmit="handlePublishNews(event)">
         <div class="form-group">
@@ -404,67 +432,18 @@
           <textarea id="newsContent" rows="4" placeholder="Escreva aqui o resumo da notícia..." required></textarea>
         </div>
 
-        <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar Notícia no Supabase</button>
+        <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar Notícia no Site</button>
       </form>
     </div>
   </div>
 
   <script>
-    // Inicialização do Supabase com as suas credenciais
-    const SUPABASE_URL = "https://uynmslyqrdnllmmsysaz.supabase.co"; 
-    const SUPABASE_KEY = "sb_publishable_1UyOPoQPhgdMWZ4lN6fxgQ_eKNQCop3";
-    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
     document.addEventListener("DOMContentLoaded", () => {
       const dateElement = document.getElementById("current-date");
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const today = new Date();
       dateElement.textContent = today.toLocaleDateString('pt-PT', options);
-
-      // Carregar notícias gravadas na base de dados
-      fetchNews();
     });
-
-    async function fetchNews() {
-      const newsGrid = document.getElementById('newsGrid');
-      newsGrid.innerHTML = '<p style="padding: 20px;">A carregar notícias da Guiné-Bissau...</p>';
-
-      const { data, error } = await _supabase
-        .from('noticias')
-        .select('*')
-        .order('id', { ascending: false });
-
-      if (error) {
-        console.error("Erro ao procurar notícias:", error);
-        newsGrid.innerHTML = '<p style="padding: 20px; color: red;">Certifique-se de criar a tabela "noticias" no Supabase com as colunas: titulo, categoria, conteudo.</p>';
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        newsGrid.innerHTML = '<p style="padding: 20px;">Nenhuma notícia publicada ainda. Faça login na Área Reservada para adicionar a primeira!</p>';
-        return;
-      }
-
-      newsGrid.innerHTML = '';
-      data.forEach(item => {
-        let tagClass = 'green-bg';
-        let headerBg = 'green-bg';
-        if(item.categoria === 'Economia') { tagClass = 'red-bg'; headerBg = 'red-bg'; }
-        if(item.categoria === 'Cultura') { tagClass = 'yellow-bg'; headerBg = 'yellow-bg'; }
-
-        const card = document.createElement('article');
-        card.className = 'news-card';
-        card.innerHTML = `
-          <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">TGB NEWS</div>
-          <div class="news-content">
-            <span class="news-tag ${tagClass}">${item.categoria || 'Sociedade'}</span>
-            <h3>${item.titulo}</h3>
-            <p>${item.conteudo}</p>
-          </div>
-        `;
-        newsGrid.appendChild(card);
-      });
-    }
 
     function openModal() {
       document.getElementById('loginModal').style.display = 'flex';
@@ -486,29 +465,38 @@
       }
     }
 
-    async function handlePublishNews(event) {
+    function handlePublishNews(event) {
       event.preventDefault();
       
       const title = document.getElementById('newsTitle').value;
       const category = document.getElementById('newsCategory').value;
       const content = document.getElementById('newsContent').value;
       
-      // Enviar a nova notícia para a base de dados do Supabase
-      const { data, error } = await _supabase
-        .from('noticias')
-        .insert([
-          { titulo: title, categoria: category, conteudo: content }
-        ]);
+      const newsGrid = document.getElementById('newsGrid');
+      const newCard = document.createElement('article');
+      newCard.className = 'news-card';
+      
+      let tagClass = 'green-bg';
+      let headerBg = 'green-bg';
+      if(category === 'Economia') { tagClass = 'red-bg'; headerBg = 'red-bg'; }
+      if(category === 'Cultura') { tagClass = 'yellow-bg'; headerBg = 'yellow-bg'; }
 
-      if (error) {
-        alert("Erro ao publicar a notícia. Verifique se criou a tabela 'noticias' no Supabase: " + error.message);
-      } else {
-        alert("Notícia gravada com sucesso na nuvem! Todo o povo já consegue ver.");
-        closeModal('adminModal');
-        document.getElementById('newsTitle').value = '';
-        document.getElementById('newsContent').value = '';
-        fetchNews(); // Atualizar a lista de notícias instantaneamente
-      }
+      newCard.innerHTML = `
+        <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
+        <div class="news-content">
+          <span class="news-tag ${tagClass}">${category}</span>
+          <h3>${title}</h3>
+          <p>${content}</p>
+        </div>
+      `;
+
+      newsGrid.insertBefore(newCard, newsGrid.firstChild);
+      
+      alert("Notícia publicada com sucesso no portal!");
+      closeModal('adminModal');
+      
+      document.getElementById('newsTitle').value = '';
+      document.getElementById('newsContent').value = '';
     }
   </script>
 </body>
