@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TGB - Televisão da Guiné-Bissau | Ao Vivo</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SDK do Supabase para JS em tempo real -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --tgb-red: #E31B23;
@@ -32,7 +34,6 @@
       margin: 0 auto;
     }
 
-    /* Topo & Navegação */
     .top-bar {
       background-color: var(--tgb-dark);
       color: white;
@@ -103,7 +104,6 @@
       color: var(--tgb-red);
     }
 
-    /* Video Hero */
     .hero-stream {
       margin: 30px auto;
       background: white;
@@ -147,7 +147,6 @@
     .btn-secondary { background: #e0e0e0; color: #333; }
     .btn-success { background: var(--tgb-green); color: white; }
 
-    /* Notícias */
     .news-section { margin: 50px auto; }
     .section-title {
       border-left: 5px solid var(--tgb-green);
@@ -187,7 +186,6 @@
     .news-card h3 { margin: 10px 0; font-size: 18px; }
     .news-card p { font-size: 14px; color: #666; line-height: 1.4; }
 
-    /* Rodapé */
     .footer {
       background: var(--tgb-dark);
       color: white;
@@ -239,7 +237,6 @@
       font-weight: bold;
     }
 
-    /* Modais */
     .modal {
       display: none;
       position: fixed;
@@ -292,7 +289,6 @@
 </head>
 <body>
 
-  <!-- Barra de Topo -->
   <header class="header">
     <div class="top-bar">
       <div class="container top-container">
@@ -318,7 +314,6 @@
     </nav>
   </header>
 
-  <!-- Transmissão em Direto -->
   <section id="em-direto" class="hero-stream container">
     <div class="player-container">
       <iframe 
@@ -338,40 +333,13 @@
     </div>
   </section>
 
-  <!-- Grelha de Notícias -->
   <section id="noticias" class="news-section container">
     <h2 class="section-title">Últimas Notícias</h2>
     <div class="news-grid" id="newsGrid">
-      <article class="news-card">
-        <div class="news-img red-bg" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">TGB NEWS</div>
-        <div class="news-content">
-          <span class="news-tag green-bg">Sociedade</span>
-          <h3>Modernização da Rede de Emissão em Bissau</h3>
-          <p>Novos equipamentos prometem expandir o sinal da TGB para todas as regiões do país.</p>
-        </div>
-      </article>
-
-      <article class="news-card">
-        <div class="news-img yellow-bg" style="display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold; font-size:20px;">TGB NEWS</div>
-        <div class="news-content">
-          <span class="news-tag red-bg">Economia</span>
-          <h3>Desenvolvimento Agrícola e Exportações</h3>
-          <p>Balanço das novas medidas de apoio aos produtores locais guineenses.</p>
-        </div>
-      </article>
-
-      <article class="news-card">
-        <div class="news-img green-bg" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">TGB NEWS</div>
-        <div class="news-content">
-          <span class="news-tag yellow-bg" style="color:#000;">Cultura</span>
-          <h3>Festival Cultural Nacional na Capital</h3>
-          <p>Música, dança e tradições guineenses em destaque este fim de semana.</p>
-        </div>
-      </article>
+      <!-- As notícias serão carregadas automaticamente do Supabase -->
     </div>
   </section>
 
-  <!-- Rodapé -->
   <footer id="contacto" class="footer">
     <div class="container footer-content">
       <p>&copy; 2026 TGB - Televisão da Guiné-Bissau. Todos os direitos reservados.</p>
@@ -388,7 +356,6 @@
     </div>
   </footer>
 
-  <!-- Modal de Login -->
   <div id="loginModal" class="modal">
     <div class="modal-box">
       <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
@@ -409,12 +376,11 @@
     </div>
   </div>
 
-  <!-- Modal do Painel de Publicação de Notícias (Painel da Redação) -->
   <div id="adminModal" class="modal">
     <div class="modal-box">
       <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
       <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-pen-to-square"></i> Painel da Redação - Publicar Notícia</h3>
-      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Carregue novas notícias para serem exibidas na página principal do site.</p>
+      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Carregue novas notícias para ficarem salvas permanentemente no Supabase.</p>
       
       <form onsubmit="handlePublishNews(event)">
         <div class="form-group">
@@ -438,18 +404,67 @@
           <textarea id="newsContent" rows="4" placeholder="Escreva aqui o resumo da notícia..." required></textarea>
         </div>
 
-        <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar Notícia no Site</button>
+        <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar Notícia no Supabase</button>
       </form>
     </div>
   </div>
 
   <script>
+    // Inicialização do Supabase com as suas credenciais
+    const SUPABASE_URL = "https://uynmslyqrdnllmmsysaz.supabase.co"; 
+    const SUPABASE_KEY = "sb_publishable_1UyOPoQPhgdMWZ4lN6fxgQ_eKNQCop3";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     document.addEventListener("DOMContentLoaded", () => {
       const dateElement = document.getElementById("current-date");
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const today = new Date();
       dateElement.textContent = today.toLocaleDateString('pt-PT', options);
+
+      // Carregar notícias gravadas na base de dados
+      fetchNews();
     });
+
+    async function fetchNews() {
+      const newsGrid = document.getElementById('newsGrid');
+      newsGrid.innerHTML = '<p style="padding: 20px;">A carregar notícias da Guiné-Bissau...</p>';
+
+      const { data, error } = await _supabase
+        .from('noticias')
+        .select('*')
+        .order('id', { ascending: false });
+
+      if (error) {
+        console.error("Erro ao procurar notícias:", error);
+        newsGrid.innerHTML = '<p style="padding: 20px; color: red;">Certifique-se de criar a tabela "noticias" no Supabase com as colunas: titulo, categoria, conteudo.</p>';
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        newsGrid.innerHTML = '<p style="padding: 20px;">Nenhuma notícia publicada ainda. Faça login na Área Reservada para adicionar a primeira!</p>';
+        return;
+      }
+
+      newsGrid.innerHTML = '';
+      data.forEach(item => {
+        let tagClass = 'green-bg';
+        let headerBg = 'green-bg';
+        if(item.categoria === 'Economia') { tagClass = 'red-bg'; headerBg = 'red-bg'; }
+        if(item.categoria === 'Cultura') { tagClass = 'yellow-bg'; headerBg = 'yellow-bg'; }
+
+        const card = document.createElement('article');
+        card.className = 'news-card';
+        card.innerHTML = `
+          <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">TGB NEWS</div>
+          <div class="news-content">
+            <span class="news-tag ${tagClass}">${item.categoria || 'Sociedade'}</span>
+            <h3>${item.titulo}</h3>
+            <p>${item.conteudo}</p>
+          </div>
+        `;
+        newsGrid.appendChild(card);
+      });
+    }
 
     function openModal() {
       document.getElementById('loginModal').style.display = 'flex';
@@ -465,50 +480,35 @@
 
       if (pass === "tgb2026") {
         closeModal('loginModal');
-        // Abre diretamente o Painel de Publicação de Notícias
         document.getElementById('adminModal').style.display = 'flex';
       } else {
         alert("Palavra-passe incorreta! Utilize: tgb2026");
       }
     }
 
-    function handlePublishNews(event) {
+    async function handlePublishNews(event) {
       event.preventDefault();
       
       const title = document.getElementById('newsTitle').value;
       const category = document.getElementById('newsCategory').value;
       const content = document.getElementById('newsContent').value;
       
-      // Criar nova carta de notícia
-      const newsGrid = document.getElementById('newsGrid');
-      const newCard = document.createElement('article');
-      newCard.className = 'news-card';
-      
-      // Cores por categoria
-      let tagClass = 'green-bg';
-      let headerBg = 'green-bg';
-      if(category === 'Economia') { tagClass = 'red-bg'; headerBg = 'red-bg'; }
-      if(category === 'Cultura') { tagClass = 'yellow-bg'; headerBg = 'yellow-bg'; }
-      if(category === 'Desporto') { tagClass = 'green-bg'; headerBg = 'green-bg'; }
+      // Enviar a nova notícia para a base de dados do Supabase
+      const { data, error } = await _supabase
+        .from('noticias')
+        .insert([
+          { titulo: title, categoria: category, conteudo: content }
+        ]);
 
-      newCard.innerHTML = `
-        <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">TGB NEWS</div>
-        <div class="news-content">
-          <span class="news-tag ${tagClass}">${category}</span>
-          <h3>${title}</h3>
-          <p>${content}</p>
-        </div>
-      `;
-
-      // Inserir a nova notícia no início da grelha
-      newsGrid.insertBefore(newCard, newsGrid.firstChild);
-      
-      alert("Notícia publicada com sucesso no portal!");
-      closeModal('adminModal');
-      
-      // Limpar formulário
-      document.getElementById('newsTitle').value = '';
-      document.getElementById('newsContent').value = '';
+      if (error) {
+        alert("Erro ao publicar a notícia. Verifique se criou a tabela 'noticias' no Supabase: " + error.message);
+      } else {
+        alert("Notícia gravada com sucesso na nuvem! Todo o povo já consegue ver.");
+        closeModal('adminModal');
+        document.getElementById('newsTitle').value = '';
+        document.getElementById('newsContent').value = '';
+        fetchNews(); // Atualizar a lista de notícias instantaneamente
+      }
     }
   </script>
 </body>
