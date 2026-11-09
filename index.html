@@ -117,7 +117,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      color: white;
+      position: relative;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .stream-info {
@@ -139,4 +145,148 @@
     }
 
     .btn-primary { background: var(--tgb-red); color: white; }
-    .btn-
+    .btn-secondary { background: #e0e0e0; color: #333; }
+
+    .news-section { margin: 50px auto; }
+    .section-title {
+      border-left: 5px solid var(--tgb-green);
+      padding-left: 10px;
+      margin-bottom: 25px;
+    }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .news-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .news-img { height: 180px; }
+    .news-content { padding: 20px; }
+
+    .news-tag {
+      font-size: 11px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      color: white;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+
+    .red-bg { background-color: var(--tgb-red); }
+    .yellow-bg { background-color: var(--tgb-yellow); color: #000; }
+    .green-bg { background-color: var(--tgb-green); }
+
+    .news-card h3 { margin: 10px 0; font-size: 18px; }
+    .news-card p { font-size: 14px; color: #666; line-height: 1.4; }
+
+    .footer {
+      background: var(--tgb-dark);
+      color: white;
+      text-align: center;
+      padding: 25px 0;
+      margin-top: 50px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="top-bar">
+      <div class="container top-container">
+        <span class="live-badge"><i class="fa-solid fa-circle"></i> AO VIVO NA TGB</span>
+        <div class="date-time" id="current-date"></div>
+      </div>
+    </div>
+    
+    <nav class="nav-container container">
+      <div class="logo">
+        <div class="logo-box">
+          <span class="red">T</span><span class="yellow">G</span><span class="green">B</span>
+          <i class="fa-solid fa-star star-icon"></i>
+        </div>
+        <span class="logo-text">Televisão da Guiné-Bissau</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#em-direto" class="active">Em Direto</a></li>
+        <li><a href="#noticias">Notícias</a></li>
+        <li><a href="#programacao">Programação</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section id="em-direto" class="hero-stream container">
+    <div class="player-container">
+      <!-- Leitor de Vídeo Funcional para Demonstração -->
+      <video controls poster="https://via.placeholder.com/1200x600/121212/FFFFFF?text=TGB+Ao+Vivo+-+Emissao+Nacional">
+        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        O seu navegador não suporta a reprodução de vídeo.
+      </video>
+    </div>
+    <div class="stream-info">
+      <h2>Telejornal Nacional - Edição Principal</h2>
+      <p>Acompanhe as principais notícias da Guiné-Bissau e do mundo em tempo real.</p>
+      <div class="share-buttons">
+        <button class="btn btn-primary"><i class="fa-solid fa-share-nodes"></i> Partilhar</button>
+        <button class="btn btn-secondary"><i class="fa-solid fa-bell"></i> Notificações</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="noticias" class="news-section container">
+    <h2 class="section-title">Últimas Notícias</h2>
+    <div class="news-grid">
+      <article class="news-card">
+        <div class="news-img red-bg" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">TGB NEWS</div>
+        <div class="news-content">
+          <span class="news-tag green-bg">Sociedade</span>
+          <h3>Modernização da Rede de Emissão em Bissau</h3>
+          <p>Novos equipamentos prometem expandir o sinal da TGB para todas as regiões do país.</p>
+        </div>
+      </article>
+
+      <article class="news-card">
+        <div class="news-img yellow-bg" style="display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold; font-size:20px;">TGB NEWS</div>
+        <div class="news-content">
+          <span class="news-tag red-bg">Economia</span>
+          <h3>Desenvolvimento Agrícola e Exportações</h3>
+          <p>Balanço das novas medidas de apoio aos produtores locais guineenses.</p>
+        </div>
+      </article>
+
+      <article class="news-card">
+        <div class="news-img green-bg" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:20px;">TGB NEWS</div>
+        <div class="news-content">
+          <span class="news-tag yellow-bg" style="color:#000;">Cultura</span>
+          <h3>Festival Cultural Nacional na Capital</h3>
+          <p>Música, dança e tradições guineenses em destaque este fim de semana.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <footer id="contacto" class="footer">
+    <div class="container footer-content">
+      <p>&copy; 2026 TGB - Televisão da Guiné-Bissau. Todos os direitos reservados.</p>
+      <p>República da Guiné-Bissau | Bissau</p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const dateElement = document.getElementById("current-date");
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const today = new Date();
+      dateElement.textContent = today.toLocaleDateString('pt-PT', options);
+    });
+  </script>
+</body>
+</html>
