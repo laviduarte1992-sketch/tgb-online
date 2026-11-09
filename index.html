@@ -315,6 +315,7 @@
   <section id="em-direto" class="hero-stream container">
     <div class="player-container">
       <iframe 
+        id="tgbPlayer"
         src="https://www.youtube-nocookie.com/embed/L_LUpnjgPso?autoplay=1&mute=1&controls=1" 
         title="TGB Emissão em Direto" 
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
@@ -322,8 +323,8 @@
       </iframe>
     </div>
     <div class="stream-info">
-      <h2>Telejornal Nacional - Edição Principal</h2>
-      <p>Acompanhe as principais notícias da Guiné-Bissau e do mundo em tempo real.</p>
+      <h2 id="streamTitle">Telejornal Nacional - Edição Principal</h2>
+      <p id="streamDesc">Acompanhe as principais notícias da Guiné-Bissau e do mundo em tempo real.</p>
       <div class="share-buttons">
         <button class="btn btn-primary"><i class="fa-solid fa-share-nodes"></i> Partilhar</button>
         <button class="btn btn-secondary"><i class="fa-solid fa-bell"></i> Notificações</button>
@@ -404,13 +405,18 @@
   <div id="adminModal" class="modal">
     <div class="modal-box">
       <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
-      <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-pen-to-square"></i> Painel da Redação - Publicar Notícia</h3>
-      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Carregue novas notícias para serem exibidas na página principal do site.</p>
+      <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-pen-to-square"></i> Painel da Redação - Publicar Notícia / Emissão</h3>
+      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Carregue novas notícias ou atualize o vídeo da transmissão ao vivo.</p>
       
       <form onsubmit="handlePublishNews(event)">
         <div class="form-group">
-          <label>Título da Notícia</label>
-          <input type="text" id="newsTitle" placeholder="Ex: Inauguração do novo centro de saúde em Bissau" required>
+          <label>Título da Notícia ou Programa</label>
+          <input type="text" id="newsTitle" placeholder="Ex: Telejornal Nacional - Edição da Noite" required>
+        </div>
+
+        <div class="form-group">
+          <label>Link / ID do Vídeo do YouTube (Opcional para mudar a transmissão)</label>
+          <input type="text" id="videoUrl" placeholder="Ex: https://www.youtube.com/watch?v=CODIGO_DO_VIDEO ou só o código">
         </div>
         
         <div class="form-group">
@@ -429,7 +435,7 @@
           <textarea id="newsContent" rows="4" placeholder="Escreva aqui o resumo da notícia..." required></textarea>
         </div>
 
-        <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar Notícia no Site</button>
+        <button type="submit" class="btn btn-success" style="width: 100%;"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar Conteúdo no Site</button>
       </form>
     </div>
   </div>
@@ -462,13 +468,30 @@
       }
     }
 
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : url;
+    }
+
     function handlePublishNews(event) {
       event.preventDefault();
       
       const title = document.getElementById('newsTitle').value;
       const category = document.getElementById('newsCategory').value;
       const content = document.getElementById('newsContent').value;
+      const rawVideoUrl = document.getElementById('videoUrl').value.trim();
       
+      // Se preencherem um link de vídeo, atualiza o leitor principal
+      if (rawVideoUrl !== '') {
+        const videoId = extractYouTubeId(rawVideoUrl);
+        document.getElementById('tgbPlayer').src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&mute=1&controls=1`;
+        document.getElementById('streamTitle').textContent = title;
+        document.getElementById('streamDesc').textContent = content;
+      }
+
+      // Adiciona o cartão da notícia à grelha
       const newsGrid = document.getElementById('newsGrid');
       const newCard = document.createElement('article');
       newCard.className = 'news-card';
@@ -489,10 +512,11 @@
 
       newsGrid.insertBefore(newCard, newsGrid.firstChild);
       
-      alert("Notícia publicada com sucesso no portal!");
+      alert("Conteúdo publicado com sucesso!");
       closeModal('adminModal');
       
       document.getElementById('newsTitle').value = '';
+      document.getElementById('videoUrl').value = '';
       document.getElementById('newsContent').value = '';
     }
   </script>
