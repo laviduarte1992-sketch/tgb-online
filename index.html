@@ -21,6 +21,10 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       background-color: var(--tgb-light);
       color: #333;
@@ -302,6 +306,8 @@
       position: relative;
       cursor: pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
     }
 
     .news-card:hover {
@@ -309,8 +315,26 @@
       box-shadow: 0 6px 16px rgba(0,0,0,0.12);
     }
 
-    .news-img { height: 180px; }
-    .news-content { padding: 20px; }
+    .news-img {
+      height: 185px;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .news-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .news-content {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
 
     .news-meta-top {
       display: flex;
@@ -348,7 +372,17 @@
     .green-bg { background-color: var(--tgb-green); }
 
     .news-card h3 { margin: 8px 0 10px 0; font-size: 18px; }
-    .news-card p { font-size: 14px; color: #666; line-height: 1.45; }
+    .news-card p { font-size: 14px; color: #666; line-height: 1.45; margin-bottom: 12px; }
+
+    .read-more-link {
+      margin-top: auto;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--tgb-green);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
 
     /* Barras Deslizantes de Notícias (Internacional e Desporto) */
     .intl-ticker-bar {
@@ -514,6 +548,57 @@
     .archive-pill:hover .pill-age {
       background: rgba(255, 255, 255, 0.18);
       color: var(--tgb-yellow);
+    }
+
+    /* Grelha de Programação Diária TGB */
+    .schedule-section {
+      margin: 45px auto 20px auto;
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      border-left: 5px solid var(--tgb-yellow);
+    }
+
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .schedule-card {
+      background: #f8f9fc;
+      border: 1px solid #e6e8f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+
+    .schedule-card.featured {
+      background: #fffdf2;
+      border-color: var(--tgb-yellow);
+    }
+
+    .schedule-time {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--tgb-red);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .schedule-card h4 {
+      font-size: 15px;
+      color: var(--tgb-dark);
+      margin-bottom: 4px;
+    }
+
+    .schedule-card p {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.4;
     }
 
     .footer {
@@ -761,6 +846,48 @@
         <!-- Pílulas de notícias anteriores geradas dinamicamente -->
       </div>
     </div>
+
+    <!-- GRELHA DE PROGRAMAÇÃO DIÁRIA DA TGB -->
+    <div class="schedule-section" id="programacao">
+      <h2 class="section-title">Programação Diária TGB</h2>
+      <div class="schedule-grid">
+        <div class="schedule-card">
+          <div class="schedule-time">
+            <span><i class="fa-regular fa-clock"></i> 07:30</span>
+            <span>MANHÃ</span>
+          </div>
+          <h4>Jornal da Manhã & Atualidade</h4>
+          <p>Primeira síntese informativa do dia, serviços públicos e previsões.</p>
+        </div>
+
+        <div class="schedule-card">
+          <div class="schedule-time">
+            <span><i class="fa-regular fa-clock"></i> 13:00</span>
+            <span>TARDE</span>
+          </div>
+          <h4>Jornal da Tarde & Regiões</h4>
+          <p>Correspondentes nas regiões, economia local e iniciativas comunitárias.</p>
+        </div>
+
+        <div class="schedule-card featured">
+          <div class="schedule-time">
+            <span><i class="fa-regular fa-clock"></i> 20:00</span>
+            <span style="color: var(--tgb-green);">DESTAQUE</span>
+          </div>
+          <h4>Telejornal Nacional TGB</h4>
+          <p>Edição principal com grandes reportagens nacionais, CEDEAO/CPLP e mundo.</p>
+        </div>
+
+        <div class="schedule-card">
+          <div class="schedule-time">
+            <span><i class="fa-regular fa-clock"></i> 21:30</span>
+            <span>NOITE</span>
+          </div>
+          <h4>Desporto & Cultura Guineense</h4>
+          <p>Análise desportiva, seleções nacionais e espaços de expressão cultural.</p>
+        </div>
+      </div>
+    </div>
   </section>
 
   <footer id="contacto" class="footer">
@@ -770,6 +897,7 @@
       <div class="footer-links">
         <a href="#em-direto">Em Direto</a>
         <a href="#noticias">Notícias</a>
+        <a href="#programacao">Programação</a>
         <a href="javascript:void(0)" onclick="openModal()" class="admin-link"><i class="fa-solid fa-lock"></i> Área Reservada (Redação/TGB)</a>
       </div>
 
@@ -784,6 +912,7 @@
     <div class="modal-box">
       <span class="close-btn" onclick="closeModal('articleModal')">&times;</span>
       <div id="articleModalMeta" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"></div>
+      <div id="articleModalImgWrap" style="margin-bottom: 14px;"></div>
       <h3 id="articleModalTitle" style="margin-bottom: 14px; color: var(--tgb-dark); font-size: 22px;"></h3>
       <p id="articleModalBody" style="font-size: 15px; color: #444; line-height: 1.6;"></p>
     </div>
@@ -825,6 +954,11 @@
           <label>Link / ID do Vídeo do YouTube (Opcional para mudar a transmissão)</label>
           <input type="text" id="videoUrl" placeholder="Ex: https://www.youtube.com/watch?v=CODIGO_DO_VIDEO">
         </div>
+
+        <div class="form-group">
+          <label>URL da Fotografia da Notícia (Opcional — se vazio, usa as cores da TGB)</label>
+          <input type="url" id="newsImageUrl" placeholder="Ex: https://exemplo.com/imagem-bissau.jpg">
+        </div>
         
         <div class="form-group">
           <label>Categoria</label>
@@ -861,7 +995,7 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "tgb_news_items_v2";
+    const STORAGE_KEY = "tgb_news_items_v3";
     let currentFilterCriteria = "all";
     let currentSearchQuery = "";
 
@@ -873,6 +1007,7 @@
           title: "Modernização da Rede de Emissão em Bissau",
           category: "Sociedade",
           content: "Novos equipamentos prometem expandir o sinal da TGB para todas as regiões do país com maior estabilidade e cobertura nacional.",
+          imageUrl: "",
           publishedAt: nowMs - (25 * 60000),
           isNow: true
         },
@@ -881,6 +1016,7 @@
           title: "Desenvolvimento Agrícola e Exportações",
           category: "Economia",
           content: "Balanço das novas medidas de apoio aos produtores locais guineenses e reforço das cadeias de exportação.",
+          imageUrl: "",
           publishedAt: nowMs - (4 * 3600000),
           isNow: false
         },
@@ -889,6 +1025,7 @@
           title: "Festival Cultural Nacional na Capital",
           category: "Cultura",
           content: "Música, dança e tradições guineenses em destaque com delegações de várias regiões do país.",
+          imageUrl: "",
           publishedAt: nowMs - (8 * 3600000),
           isNow: false
         },
@@ -897,6 +1034,7 @@
           title: "Programa de Saúde Comunitária nas Regiões",
           category: "Sociedade",
           content: "Equipas móveis reforçam consultas de prevenção e assistência sanitária fora da capital.",
+          imageUrl: "",
           publishedAt: nowMs - (2 * day),
           isNow: false
         },
@@ -905,6 +1043,7 @@
           title: "Reunião Técnica sobre Energia e Conectividade",
           category: "Economia",
           content: "Avaliação do plano de expansão de redes elétricas e digitais no interior do país.",
+          imageUrl: "",
           publishedAt: nowMs - (5 * day),
           isNow: false
         },
@@ -913,6 +1052,7 @@
           title: "Arquivo: Reabilitação de Infraestruturas Locais",
           category: "Sociedade",
           content: "Notícia anterior a 7 dias: balanço de obras públicas e vias de acesso concluídas anteriormente.",
+          imageUrl: "",
           publishedAt: nowMs - (10 * day),
           isNow: false
         }
@@ -998,6 +1138,10 @@
       handleSearchInput("");
     }
 
+    function getFallbackHeaderMarkup(headerBg, textColor) {
+      return `<div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:${textColor}; font-weight:bold; font-size:24px;">TGB NEWS</div>`;
+    }
+
     function renderNewsLayout() {
       const newsGrid = document.getElementById("newsGrid");
       const pastPills = document.getElementById("pastNewsPills");
@@ -1028,8 +1172,9 @@
 
         let tagClass = "green-bg";
         let headerBg = "green-bg";
-        if (item.category === "Economia") { tagClass = "red-bg"; headerBg = "red-bg"; }
-        if (item.category === "Cultura") { tagClass = "yellow-bg"; headerBg = "yellow-bg"; }
+        let textColor = "white";
+        if (item.category === "Economia") { tagClass = "red-bg"; headerBg = "red-bg"; textColor = "white"; }
+        if (item.category === "Cultura") { tagClass = "yellow-bg"; headerBg = "yellow-bg"; textColor = "#000"; }
 
         const belongsInPastStrip = isOlderThan24h;
 
@@ -1055,6 +1200,11 @@
             ? `<i class="fa-solid fa-circle" style="font-size: 8px;"></i>`
             : `<i class="fa-regular fa-clock"></i>`;
 
+          const safeImg = (item.imageUrl || "").trim();
+          const mediaHtml = safeImg
+            ? `<div class="news-img ${headerBg}"><img src="${safeImg.replace(/"/g, "&quot;")}" alt="${item.title.replace(/"/g, "&quot;")}" onerror="this.parentElement.outerHTML='${getFallbackHeaderMarkup(headerBg, textColor).replace(/'/g, "\\'")}'"></div>`
+            : getFallbackHeaderMarkup(headerBg, textColor);
+
           const card = document.createElement("article");
           card.className = "news-card";
           card.onclick = function () {
@@ -1062,7 +1212,7 @@
           };
 
           card.innerHTML = `
-            <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
+            ${mediaHtml}
             <div class="news-content">
               <div class="news-meta-top">
                 <span class="news-tag ${tagClass}">${item.category}</span>
@@ -1070,6 +1220,7 @@
               </div>
               <h3>${item.title}</h3>
               <p>${item.content}</p>
+              <span class="read-more-link">Ler notícia completa <i class="fa-solid fa-arrow-right"></i></span>
             </div>
           `;
           newsGrid.appendChild(card);
@@ -1113,6 +1264,11 @@
         <span class="news-tag ${tagClass}">${item.category}</span>
         <span class="${stampClass}">${stampIcon} ${stampText}</span>
       `;
+      const imgWrap = document.getElementById('articleModalImgWrap');
+      const safeImg = (item.imageUrl || "").trim();
+      imgWrap.innerHTML = safeImg
+        ? `<img src="${safeImg.replace(/"/g, "&quot;")}" alt="${item.title.replace(/"/g, "&quot;")}" style="width:100%; max-height:240px; object-fit:cover; border-radius:8px;" onerror="this.remove()">`
+        : "";
       document.getElementById('articleModalTitle').textContent = item.title;
       document.getElementById('articleModalBody').textContent = item.content;
       document.getElementById('articleModal').style.display = 'flex';
@@ -1282,6 +1438,7 @@
       const category = document.getElementById('newsCategory').value;
       const content = document.getElementById('newsContent').value;
       const rawVideoUrl = document.getElementById('videoUrl').value.trim();
+      const imageUrl = document.getElementById('newsImageUrl').value.trim();
       
       if (rawVideoUrl !== '') {
         const videoId = extractYouTubeId(rawVideoUrl);
@@ -1309,6 +1466,7 @@
           title,
           category,
           content,
+          imageUrl,
           publishedAt: Date.now(),
           isNow: true
         });
@@ -1322,6 +1480,7 @@
       
       document.getElementById('newsTitle').value = '';
       document.getElementById('videoUrl').value = '';
+      document.getElementById('newsImageUrl').value = '';
       document.getElementById('newsContent').value = '';
     }
   </script>
