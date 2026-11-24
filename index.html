@@ -216,6 +216,68 @@
     .news-card h3 { margin: 10px 0; font-size: 18px; }
     .news-card p { font-size: 14px; color: #666; line-height: 1.4; }
 
+    /* Barra de Notícias Internacionais Deslizante (Estilo BBC/CNN) */
+    .intl-ticker-bar {
+      margin-top: 30px;
+      background: var(--tgb-dark);
+      color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      border-left: 5px solid var(--tgb-yellow);
+    }
+
+    .ticker-label {
+      background: var(--tgb-red);
+      color: white;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 14px 18px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .ticker-track-wrapper {
+      overflow: hidden;
+      width: 100%;
+      padding: 12px 0;
+    }
+
+    .ticker-track {
+      display: inline-block;
+      white-space: nowrap;
+      padding-left: 100%;
+      animation: tickerSlide 32s linear infinite;
+    }
+
+    .intl-ticker-bar:hover .ticker-track {
+      animation-play-state: paused;
+    }
+
+    .ticker-item {
+      display: inline-block;
+      font-size: 14px;
+      margin-right: 45px;
+      color: #f1f1f1;
+    }
+
+    .ticker-item strong {
+      color: var(--tgb-yellow);
+      margin-right: 6px;
+    }
+
+    @keyframes tickerSlide {
+      0% { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
+
     .footer {
       background: var(--tgb-dark);
       color: white;
@@ -417,6 +479,21 @@
       </article>
 
     </div>
+
+    <!-- BARRA DESLIZANTE DE NOTÍCIAS INTERNACIONAIS (ESTILO BBC/CNN) -->
+    <div class="intl-ticker-bar">
+      <div class="ticker-label">
+        <i class="fa-solid fa-globe"></i> INTERNACIONAL
+      </div>
+      <div class="ticker-track-wrapper">
+        <div class="ticker-track" id="intlTickerTrack">
+          <span class="ticker-item"><strong>CEDEAO:</strong> Cimeira regional debate cooperação económica e segurança na África Ocidental.</span>
+          <span class="ticker-item"><strong>CPLP:</strong> Estados-membros reforçam acordos de mobilidade e intercâmbio cultural entre países lusófonos.</span>
+          <span class="ticker-item"><strong>UNIÃO AFRICANA:</strong> Novos investimentos em infraestruturas digitais e energias renováveis no continente.</span>
+          <span class="ticker-item"><strong>ONU:</strong> Assembleia Geral destaca metas de desenvolvimento sustentável e apoio à agricultura familiar.</span>
+        </div>
+      </div>
+    </div>
   </section>
 
   <footer id="contacto" class="footer">
@@ -459,7 +536,7 @@
     <div class="modal-box">
       <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
       <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-pen-to-square"></i> Painel da Redação - Publicar & Gestão</h3>
-      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Publique novos conteúdos ou limpe publicações antigas do site.</p>
+      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Publique novos conteúdos, atualize o ticker internacional ou limpe publicações antigas.</p>
       
       <form onsubmit="handlePublishNews(event)">
         <div class="form-group">
@@ -480,6 +557,7 @@
             <option value="Cultura">Cultura</option>
             <option value="Desporto">Desporto</option>
             <option value="Política">Política</option>
+            <option value="Internacional">Internacional (Barra Deslizante)</option>
           </select>
         </div>
 
@@ -509,7 +587,6 @@
       dateElement.textContent = today.toLocaleDateString('pt-PT', options);
     });
 
-    // Palavra-passe global para desbloquear o site completo (podes alterar "tgb2026" se preferires outra)
     function handleGlobalUnlock(event) {
       event.preventDefault();
       const pass = document.getElementById('globalPassInput').value;
@@ -595,25 +672,35 @@
         document.getElementById('streamDesc').textContent = content;
       }
 
-      const newsGrid = document.getElementById('newsGrid');
-      const newCard = document.createElement('article');
-      newCard.className = 'news-card';
-      
-      let tagClass = 'green-bg';
-      let headerBg = 'green-bg';
-      if(category === 'Economia') { tagClass = 'red-bg'; headerBg = 'red-bg'; }
-      if(category === 'Cultura') { tagClass = 'yellow-bg'; headerBg = 'yellow-bg'; }
+      // Se a categoria escolhida for "Internacional", adiciona à barra deslizante em movimento
+      if (category === 'Internacional') {
+        const tickerTrack = document.getElementById('intlTickerTrack');
+        const newTickerItem = document.createElement('span');
+        newTickerItem.className = 'ticker-item';
+        newTickerItem.innerHTML = `<strong>${title.toUpperCase()}:</strong> ${content}`;
+        tickerTrack.prepend(newTickerItem);
+      } else {
+        // Caso contrário, cria um cartão na grelha principal
+        const newsGrid = document.getElementById('newsGrid');
+        const newCard = document.createElement('article');
+        newCard.className = 'news-card';
+        
+        let tagClass = 'green-bg';
+        let headerBg = 'green-bg';
+        if(category === 'Economia') { tagClass = 'red-bg'; headerBg = 'red-bg'; }
+        if(category === 'Cultura') { tagClass = 'yellow-bg'; headerBg = 'yellow-bg'; }
 
-      newCard.innerHTML = `
-        <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
-        <div class="news-content">
-          <span class="news-tag ${tagClass}">${category}</span>
-          <h3>${title}</h3>
-          <p>${content}</p>
-        </div>
-      `;
+        newCard.innerHTML = `
+          <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
+          <div class="news-content">
+            <span class="news-tag ${tagClass}">${category}</span>
+            <h3>${title}</h3>
+            <p>${content}</p>
+          </div>
+        `;
 
-      newsGrid.insertBefore(newCard, newsGrid.firstChild);
+        newsGrid.insertBefore(newCard, newsGrid.firstChild);
+      }
       
       alert("Conteúdo publicado com sucesso!");
       closeModal('adminModal');
