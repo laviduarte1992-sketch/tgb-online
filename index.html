@@ -376,6 +376,75 @@
       100% { transform: translate3d(-100%, 0, 0); }
     }
 
+    /* Faixa / Rodapé Editorial de Notícias Anteriores (Estilo Arquivo SIC) */
+    .past-news-strip {
+      margin-top: 22px;
+      background: white;
+      border-radius: 10px;
+      padding: 20px 22px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      border-top: 4px solid var(--tgb-red);
+    }
+
+    .past-news-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .past-news-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--tgb-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .past-news-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .archive-pill {
+      background: #f2f3f7;
+      border: 1px solid #e2e4ec;
+      color: #222;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .archive-pill:hover {
+      background: var(--tgb-dark);
+      color: white;
+      border-color: var(--tgb-dark);
+    }
+
+    .archive-pill .pill-age {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(0, 135, 81, 0.14);
+      color: var(--tgb-green);
+    }
+
+    .archive-pill:hover .pill-age {
+      background: rgba(255, 255, 255, 0.18);
+      color: var(--tgb-yellow);
+    }
+
     .footer {
       background: var(--tgb-dark);
       color: white;
@@ -547,12 +616,12 @@
 
   <section id="noticias" class="news-section container">
     <div class="news-header-row">
-      <h2 class="section-title">Últimas Notícias & Cronologia</h2>
+      <h2 class="section-title">Últimas Notícias</h2>
       <div class="news-filters" id="newsFilters">
-        <button class="filter-btn active" onclick="filterNews('all', this)">Todas</button>
-        <button class="filter-btn" onclick="filterNews('agora', this)">Agora / Recentes</button>
+        <button class="filter-btn active" onclick="filterNews('all', this)">Destaques</button>
+        <button class="filter-btn" onclick="filterNews('agora', this)">Agora / Hoje</button>
         <button class="filter-btn" onclick="filterNews('7dias', this)">Últimos 7 Dias</button>
-        <button class="filter-btn" onclick="filterNews('anteriores', this)">Anteriores</button>
+        <button class="filter-btn" onclick="filterNews('anteriores', this)">Mais de 7 Dias</button>
         <button class="filter-btn" onclick="filterNews('Sociedade', this)">Sociedade</button>
         <button class="filter-btn" onclick="filterNews('Economia', this)">Economia</button>
         <button class="filter-btn" onclick="filterNews('Cultura', this)">Cultura</button>
@@ -560,7 +629,7 @@
     </div>
 
     <div class="news-grid" id="newsGrid">
-      <!-- Cartões carregados dinamicamente com datas reais e histórico dos últimos 7 dias -->
+      <!-- Cartões de destaque carregados dinamicamente -->
     </div>
 
     <!-- BARRA DESLIZANTE DE NOTÍCIAS INTERNACIONAIS DE TODO O MUNDO -->
@@ -584,6 +653,20 @@
         <div class="ticker-track ticker-track-sports" id="sportsTickerTrack">
           <span class="ticker-item"><strong>DESPORTO:</strong> A carregar atualidade desportiva mundial em tempo real...</span>
         </div>
+      </div>
+    </div>
+
+    <!-- RODAPÉ EDITORIAL DE NOTÍCIAS ANTERIORES (ÚLTIMOS 7 DIAS E HISTÓRICO) -->
+    <div class="past-news-strip" id="pastNewsStrip">
+      <div class="past-news-header">
+        <div class="past-news-title">
+          <i class="fa-solid fa-clock-rotate-left" style="color: var(--tgb-red);"></i>
+          Arquivo de Notícias Anteriores (Últimos 7 Dias & Histórico)
+        </div>
+        <span style="font-size: 12px; color: #666;">Clique numa notícia para abrir o resumo completo</span>
+      </div>
+      <div class="past-news-pills" id="pastNewsPills">
+        <!-- Pílulas de notícias anteriores geradas dinamicamente -->
       </div>
     </div>
   </section>
@@ -676,7 +759,7 @@
       
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
         <h4 style="font-size: 15px; color: var(--tgb-red);"><i class="fa-solid fa-trash-can"></i> Gerir Conteúdos Ativos</h4>
-        <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="resetDefaultNews()">Repor 7 Dias Base</button>
+        <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="resetDefaultNews()">Repor Notícias Base</button>
       </div>
       <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Clique em "Remover" para apagar imediatamente uma notícia do site:</p>
       <div id="adminNewsList" style="max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 4px;">
@@ -686,11 +769,10 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "tgb_news_items_v1";
+    const STORAGE_KEY = "tgb_news_items_v2";
     let currentFilterCriteria = "all";
 
     function createInitialNews(nowMs) {
-      const hour = 3600000;
       const day = 86400000;
       return [
         {
@@ -706,7 +788,7 @@
           title: "Desenvolvimento Agrícola e Exportações",
           category: "Economia",
           content: "Balanço das novas medidas de apoio aos produtores locais guineenses e reforço das cadeias de exportação.",
-          publishedAt: nowMs - (2 * day),
+          publishedAt: nowMs - (4 * 3600000),
           isNow: false
         },
         {
@@ -714,7 +796,7 @@
           title: "Festival Cultural Nacional na Capital",
           category: "Cultura",
           content: "Música, dança e tradições guineenses em destaque com delegações de várias regiões do país.",
-          publishedAt: nowMs - (4 * day),
+          publishedAt: nowMs - (8 * 3600000),
           isNow: false
         },
         {
@@ -722,15 +804,23 @@
           title: "Programa de Saúde Comunitária nas Regiões",
           category: "Sociedade",
           content: "Equipas móveis reforçam consultas de prevenção e assistência sanitária fora da capital.",
-          publishedAt: nowMs - (6 * day),
+          publishedAt: nowMs - (2 * day),
           isNow: false
         },
         {
           id: "n-5",
-          title: "Reabilitação de Infraestruturas Locais",
+          title: "Reunião Técnica sobre Energia e Conectividade",
           category: "Economia",
-          content: "Arquivo de obras públicas e projetos de ligação rodoviária concluídos há mais de uma semana.",
-          publishedAt: nowMs - (12 * day),
+          content: "Avaliação do plano de expansão de redes elétricas e digitais no interior do país.",
+          publishedAt: nowMs - (5 * day),
+          isNow: false
+        },
+        {
+          id: "n-6",
+          title: "Arquivo: Reabilitação de Infraestruturas Locais",
+          category: "Sociedade",
+          content: "Notícia anterior a 7 dias: balanço de obras públicas e vias de acesso concluídas anteriormente.",
+          publishedAt: nowMs - (10 * day),
           isNow: false
         }
       ];
@@ -759,7 +849,7 @@
     function resetDefaultNews() {
       const initial = createInitialNews(Date.now());
       saveStoredNews(initial);
-      renderNewsCards();
+      renderNewsLayout();
       updateAdminNewsList();
     }
 
@@ -772,82 +862,130 @@
 
       if (isNow || diffMins < 60) {
         const timeStr = new Date(publishedAt).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-        return { text: `AGORA · ${timeStr}`, isRecent: true };
+        return { text: `AGORA · ${timeStr}`, shortAge: "AGORA", isRecent: true };
       }
       if (diffHours < 24) {
-        return { text: `Há ${diffHours}h`, isRecent: true };
+        return { text: `Há ${diffHours}h`, shortAge: `Há ${diffHours}h`, isRecent: true };
       }
       if (diffDays === 1) {
-        return { text: `Ontem (Há 1 dia)`, isRecent: false };
+        return { text: `Ontem (Há 1 dia)`, shortAge: "Há 1 dia", isRecent: false };
       }
       if (diffDays <= 7) {
-        return { text: `Há ${diffDays} dias`, isRecent: false };
+        return { text: `Há ${diffDays} dias`, shortAge: `Há ${diffDays} dias`, isRecent: false };
       }
       const dateStr = new Date(publishedAt).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
-      return { text: `Anterior · ${dateStr}`, isRecent: false };
+      return { text: `Anterior · ${dateStr}`, shortAge: `>${dateStr}`, isRecent: false };
     }
 
-    function renderNewsCards() {
+    function renderNewsLayout() {
       const newsGrid = document.getElementById("newsGrid");
-      if (!newsGrid) return;
+      const pastPills = document.getElementById("pastNewsPills");
+      if (!newsGrid || !pastPills) return;
 
       const items = loadStoredNews().sort((a, b) => b.publishedAt - a.publishedAt);
       const nowMs = Date.now();
-      const sevenDaysMs = 7 * 86400000;
       const oneDayMs = 86400000;
+      const sevenDaysMs = 7 * 86400000;
 
       newsGrid.innerHTML = "";
+      pastPills.innerHTML = "";
+
+      let mainCount = 0;
 
       items.forEach((item) => {
         const ageMs = nowMs - item.publishedAt;
         const isLast7Days = ageMs <= sevenDaysMs;
-        const isRecentPeriod = item.isNow || ageMs <= oneDayMs;
-        const periodAttr = isRecentPeriod ? "agora" : "anteriores";
+        const isOver7Days = ageMs > sevenDaysMs;
+        const isOlderThan24h = !item.isNow && ageMs > oneDayMs;
 
-        let visible = true;
-        if (currentFilterCriteria === "agora") {
-          visible = isRecentPeriod;
-        } else if (currentFilterCriteria === "7dias") {
-          visible = isLast7Days;
-        } else if (currentFilterCriteria === "anteriores") {
-          visible = !isRecentPeriod;
-        } else if (currentFilterCriteria !== "all") {
-          visible = item.category === currentFilterCriteria;
-        }
+        const stampInfo = formatRelativeTime(item.publishedAt, item.isNow);
 
         let tagClass = "green-bg";
         let headerBg = "green-bg";
         if (item.category === "Economia") { tagClass = "red-bg"; headerBg = "red-bg"; }
         if (item.category === "Cultura") { tagClass = "yellow-bg"; headerBg = "yellow-bg"; }
 
-        const stampInfo = formatRelativeTime(item.publishedAt, item.isNow);
-        const stampClass = stampInfo.isRecent ? "time-stamp" : "time-stamp older";
-        const stampIcon = stampInfo.isRecent
-          ? `<i class="fa-solid fa-circle" style="font-size: 8px;"></i>`
-          : `<i class="fa-regular fa-clock"></i>`;
+        // Notícias mais antigas (há vários dias ou mais de 7 dias) vão para o rodapé/faixa de arquivo
+        const belongsInPastStrip = isOlderThan24h;
 
-        const card = document.createElement("article");
-        card.className = "news-card";
-        card.style.display = visible ? "" : "none";
-        card.setAttribute("data-category", item.category);
-        card.setAttribute("data-period", periodAttr);
-        card.setAttribute("data-7days", isLast7Days ? "1" : "0");
-        card.onclick = function () { openArticleModal(this); };
+        let showInMainGrid = false;
+        if (currentFilterCriteria === "all") {
+          showInMainGrid = !belongsInPastStrip && mainCount < 3;
+        } else if (currentFilterCriteria === "agora") {
+          showInMainGrid = !belongsInPastStrip;
+        } else if (currentFilterCriteria === "7dias") {
+          showInMainGrid = isLast7Days;
+        } else if (currentFilterCriteria === "anteriores") {
+          showInMainGrid = isOver7Days;
+        } else {
+          showInMainGrid = item.category === currentFilterCriteria;
+        }
 
-        card.innerHTML = `
-          <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
-          <div class="news-content">
-            <div class="news-meta-top">
-              <span class="news-tag ${tagClass}">${item.category}</span>
-              <span class="${stampClass}">${stampIcon} ${stampInfo.text}</span>
+        if (showInMainGrid) {
+          mainCount++;
+          const stampClass = stampInfo.isRecent ? "time-stamp" : "time-stamp older";
+          const stampIcon = stampInfo.isRecent
+            ? `<i class="fa-solid fa-circle" style="font-size: 8px;"></i>`
+            : `<i class="fa-regular fa-clock"></i>`;
+
+          const card = document.createElement("article");
+          card.className = "news-card";
+          card.onclick = function () {
+            openArticleModalByData(item, stampInfo.text, tagClass, stampClass, stampIcon);
+          };
+
+          card.innerHTML = `
+            <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
+            <div class="news-content">
+              <div class="news-meta-top">
+                <span class="news-tag ${tagClass}">${item.category}</span>
+                <span class="${stampClass}">${stampIcon} ${stampInfo.text}</span>
+              </div>
+              <h3>${item.title}</h3>
+              <p>${item.content}</p>
             </div>
-            <h3>${item.title}</h3>
-            <p>${item.content}</p>
-          </div>
-        `;
+          `;
+          newsGrid.appendChild(card);
+        }
 
-        newsGrid.appendChild(card);
+        if (belongsInPastStrip) {
+          const pill = document.createElement("button");
+          pill.type = "button";
+          pill.className = "archive-pill";
+          pill.onclick = function () {
+            openArticleModalByData(
+              item,
+              stampInfo.text,
+              tagClass,
+              "time-stamp older",
+              `<i class="fa-regular fa-clock"></i>`
+            );
+          };
+          pill.innerHTML = `
+            <span>${item.title}</span>
+            <span class="pill-age">${stampInfo.shortAge}</span>
+          `;
+          pastPills.appendChild(pill);
+        }
       });
+
+      if (mainCount === 0) {
+        newsGrid.innerHTML = `<p style="color:#666; font-size:14px;">Nenhuma notícia encontrada para este filtro.</p>`;
+      }
+
+      if (pastPills.children.length === 0) {
+        pastPills.innerHTML = `<span style="font-size:13px; color:#777;">Sem notícias anteriores registadas neste momento.</span>`;
+      }
+    }
+
+    function openArticleModalByData(item, stampText, tagClass, stampClass, stampIcon) {
+      document.getElementById('articleModalMeta').innerHTML = `
+        <span class="news-tag ${tagClass}">${item.category}</span>
+        <span class="${stampClass}">${stampIcon} ${stampText}</span>
+      `;
+      document.getElementById('articleModalTitle').textContent = item.title;
+      document.getElementById('articleModalBody').textContent = item.content;
+      document.getElementById('articleModal').style.display = 'flex';
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -856,7 +994,7 @@
       const today = new Date();
       dateElement.textContent = today.toLocaleDateString('pt-PT', options);
 
-      renderNewsCards();
+      renderNewsLayout();
 
       const worldSources = [
         { url: "https://www.rtp.pt/noticias/rss/mundo", label: "RTP MUNDO" },
@@ -890,22 +1028,7 @@
         btn.classList.remove('active');
       });
       if (btnElement) btnElement.classList.add('active');
-      renderNewsCards();
-    }
-
-    function openArticleModal(cardElement) {
-      const tag = cardElement.querySelector('.news-tag');
-      const stamp = cardElement.querySelector('.time-stamp');
-      const title = cardElement.querySelector('h3').textContent;
-      const body = cardElement.querySelector('p').textContent;
-
-      document.getElementById('articleModalMeta').innerHTML = `
-        <span>${tag ? tag.outerHTML : ''}</span>
-        <span>${stamp ? stamp.outerHTML : ''}</span>
-      `;
-      document.getElementById('articleModalTitle').textContent = title;
-      document.getElementById('articleModalBody').textContent = body;
-      document.getElementById('articleModal').style.display = 'flex';
+      renderNewsLayout();
     }
 
     async function loadMultiSourceTicker(sources, trackId, fallbackHtml) {
@@ -1011,7 +1134,7 @@
     function removeCardAndRefresh(id) {
       const updated = loadStoredNews().filter((item) => item.id !== id);
       saveStoredNews(updated);
-      renderNewsCards();
+      renderNewsLayout();
       updateAdminNewsList();
     }
 
@@ -1060,7 +1183,7 @@
           isNow: true
         });
         saveStoredNews(items);
-        renderNewsCards();
+        renderNewsLayout();
         updateAdminNewsList();
       }
       
