@@ -271,11 +271,11 @@
       display: inline-block;
       white-space: nowrap;
       padding-left: 100%;
-      animation: tickerSlide 45s linear infinite;
+      animation: tickerSlide 65s linear infinite;
     }
 
     .ticker-track-sports {
-      animation: tickerSlide 42s linear infinite;
+      animation: tickerSlide 60s linear infinite;
     }
 
     .intl-ticker-bar:hover .ticker-track,
@@ -515,26 +515,26 @@
 
     </div>
 
-    <!-- BARRA DESLIZANTE DE NOTÍCIAS INTERNACIONAIS REAIS -->
+    <!-- BARRA DESLIZANTE DE NOTÍCIAS INTERNACIONAIS DE TODO O MUNDO -->
     <div class="intl-ticker-bar">
       <div class="ticker-label">
         <i class="fa-solid fa-globe"></i> INTERNACIONAL
       </div>
       <div class="ticker-track-wrapper">
         <div class="ticker-track" id="intlTickerTrack">
-          <span class="ticker-item"><strong>MUNDO:</strong> A carregar notícias internacionais reais em tempo real...</span>
+          <span class="ticker-item"><strong>MUNDO:</strong> A carregar notícias internacionais de todo o mundo em tempo real...</span>
         </div>
       </div>
     </div>
 
-    <!-- BARRA DESLIZANTE DE DESPORTO REAL -->
+    <!-- BARRA DESLIZANTE DE DESPORTO MUNDIAL EM PORTUGUÊS -->
     <div class="sports-ticker-bar">
       <div class="ticker-label ticker-label-sports">
         <i class="fa-solid fa-futbol"></i> DESPORTO
       </div>
       <div class="ticker-track-wrapper">
         <div class="ticker-track ticker-track-sports" id="sportsTickerTrack">
-          <span class="ticker-item"><strong>DESPORTO:</strong> A carregar notícias desportivas internacionais em tempo real...</span>
+          <span class="ticker-item"><strong>DESPORTO:</strong> A carregar atualidade desportiva mundial em tempo real...</span>
         </div>
       </div>
     </div>
@@ -631,45 +631,79 @@
       const today = new Date();
       dateElement.textContent = today.toLocaleDateString('pt-PT', options);
 
-      loadWorldNewsTicker(
-        "https://feeds.bbci.co.uk/portuguese/rss.xml",
+      // Fontes múltiplas de notícias internacionais de todo o mundo (em português)
+      const worldSources = [
+        { url: "https://www.rtp.pt/noticias/rss/mundo", label: "RTP MUNDO" },
+        { url: "https://pt.euronews.com/rss?format=mrss&level=theme&name=news", label: "EURONEWS" },
+        { url: "https://rss.dw.com/rdf/rss-pt-all", label: "DW MUNDO" },
+        { url: "https://feeds.bbci.co.uk/portuguese/rss.xml", label: "BBC MUNDO" }
+      ];
+
+      // Fontes múltiplas de desporto internacional (em português)
+      const sportsSources = [
+        { url: "https://www.rtp.pt/noticias/rss/desporto", label: "RTP DESPORTO" },
+        { url: "https://pt.euronews.com/rss?format=mrss&level=theme&name=sport", label: "EURONEWS DESPORTO" },
+        { url: "https://www.noticiasaominuto.com/rss/desporto", label: "DESPORTO MUNDIAL" }
+      ];
+
+      loadMultiSourceTicker(
+        worldSources,
         "intlTickerTrack",
-        "BBC BRASIL",
         "<strong>MUNDO:</strong> Acompanhamento das principais notícias internacionais em direto na TGB."
       );
 
-      loadWorldNewsTicker(
-        "https://feeds.bbci.co.uk/sport/rss.xml",
+      loadMultiSourceTicker(
+        sportsSources,
         "sportsTickerTrack",
-        "BBC SPORT",
         "<strong>DESPORTO:</strong> Resultados e novidades do desporto mundial em destaque."
       );
     });
 
-    async function loadWorldNewsTicker(rssUrl, trackId, sourceLabel, fallbackHtml) {
+    async function loadMultiSourceTicker(sources, trackId, fallbackHtml) {
       const track = document.getElementById(trackId);
       if (!track) return;
 
-      try {
-        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error("Falha ao obter feed");
+      const results = await Promise.allSettled(
+        sources.map(async (src) => {
+          const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(src.url)}`;
+          const response = await fetch(apiUrl);
+          if (!response.ok) throw new Error("Falha ao obter feed");
+          const data = await response.json();
+          if (!data.items || data.items.length === 0) throw new Error("Sem itens");
+          return data.items.slice(0, 4).map((item) => ({
+            source: src.label,
+            title: item.title || "",
+            link: item.link || "#noticias"
+          }));
+        })
+      );
 
-        const data = await response.json();
-        if (!data.items || data.items.length === 0) throw new Error("Sem itens");
+      const lists = results
+        .filter((r) => r.status === "fulfilled" && r.value.length > 0)
+        .map((r) => r.value);
 
-        track.innerHTML = "";
-        data.items.slice(0, 8).forEach((item) => {
-          const span = document.createElement("span");
-          span.className = "ticker-item";
-          const safeTitle = (item.title || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-          const safeLink = item.link || "#noticias";
-          span.innerHTML = `<strong>${sourceLabel}:</strong> <a href="${safeLink}" target="_blank" rel="noopener noreferrer">${safeTitle}</a>`;
-          track.appendChild(span);
-        });
-      } catch (err) {
+      if (lists.length === 0) {
         track.innerHTML = `<span class="ticker-item">${fallbackHtml}</span>`;
+        return;
       }
+
+      // Intercalar notícias das várias agências internacionais para maior variedade
+      const mixedItems = [];
+      const maxLen = Math.max(...lists.map((l) => l.length));
+      for (let i = 0; i < maxLen; i++) {
+        for (const list of lists) {
+          if (list[i]) mixedItems.push(list[i]);
+        }
+      }
+
+      track.innerHTML = "";
+      mixedItems.forEach((item) => {
+        const span = document.createElement("span");
+        span.className = "ticker-item";
+        const safeTitle = item.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        span.innerHTML = `<strong>${item.source}:</strong> <a href="${item.link}" target="_blank" rel="noopener noreferrer">${safeTitle}</a>`;
+        track.appendChild(span);
+      });
     }
 
     function handleGlobalUnlock(event) {
