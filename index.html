@@ -271,11 +271,11 @@
       display: inline-block;
       white-space: nowrap;
       padding-left: 100%;
-      animation: tickerSlide 32s linear infinite;
+      animation: tickerSlide 45s linear infinite;
     }
 
     .ticker-track-sports {
-      animation: tickerSlide 28s linear infinite;
+      animation: tickerSlide 42s linear infinite;
     }
 
     .intl-ticker-bar:hover .ticker-track,
@@ -288,6 +288,15 @@
       font-size: 14px;
       margin-right: 45px;
       color: #f1f1f1;
+    }
+
+    .ticker-item a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .ticker-item a:hover {
+      text-decoration: underline;
     }
 
     .ticker-item strong {
@@ -506,32 +515,26 @@
 
     </div>
 
-    <!-- BARRA DESLIZANTE DE NOTÍCIAS INTERNACIONAIS (ESTILO BBC/CNN) -->
+    <!-- BARRA DESLIZANTE DE NOTÍCIAS INTERNACIONAIS REAIS -->
     <div class="intl-ticker-bar">
       <div class="ticker-label">
         <i class="fa-solid fa-globe"></i> INTERNACIONAL
       </div>
       <div class="ticker-track-wrapper">
         <div class="ticker-track" id="intlTickerTrack">
-          <span class="ticker-item"><strong>CEDEAO:</strong> Cimeira regional debate cooperação económica e segurança na África Ocidental.</span>
-          <span class="ticker-item"><strong>CPLP:</strong> Estados-membros reforçam acordos de mobilidade e intercâmbio cultural entre países lusófonos.</span>
-          <span class="ticker-item"><strong>UNIÃO AFRICANA:</strong> Novos investimentos em infraestruturas digitais e energias renováveis no continente.</span>
-          <span class="ticker-item"><strong>ONU:</strong> Assembleia Geral destaca metas de desenvolvimento sustentável e apoio à agricultura familiar.</span>
+          <span class="ticker-item"><strong>MUNDO:</strong> A carregar notícias internacionais reais em tempo real...</span>
         </div>
       </div>
     </div>
 
-    <!-- BARRA DESLIZANTE DE DESPORTO -->
+    <!-- BARRA DESLIZANTE DE DESPORTO REAL -->
     <div class="sports-ticker-bar">
       <div class="ticker-label ticker-label-sports">
         <i class="fa-solid fa-futbol"></i> DESPORTO
       </div>
       <div class="ticker-track-wrapper">
         <div class="ticker-track ticker-track-sports" id="sportsTickerTrack">
-          <span class="ticker-item"><strong>DJURTUS:</strong> Seleção nacional prepara próximos compromissos internacionais com foco na exibição em Bissau.</span>
-          <span class="ticker-item"><strong>CAMPEONATO NACIONAL:</strong> Clubes guineenses intensificam treinos para mais uma jornada emocionante.</span>
-          <span class="ticker-item"><strong>ATLETISMO & MODALIDADES:</strong> Jovens talentos da Guiné-Bissau em destaque nas formações desportivas.</span>
-          <span class="ticker-item"><strong>FUTEBOL AFRICANO:</strong> Resumo das principais provas continentais e atuações de atletas guineenses no estrangeiro.</span>
+          <span class="ticker-item"><strong>DESPORTO:</strong> A carregar notícias desportivas internacionais em tempo real...</span>
         </div>
       </div>
     </div>
@@ -577,7 +580,7 @@
     <div class="modal-box">
       <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
       <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-pen-to-square"></i> Painel da Redação - Publicar & Gestão</h3>
-      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Publique novos conteúdos, atualize as barras deslizantes ou limpe publicações antigas.</p>
+      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Publique novos conteúdos, adicione manchetes às barras deslizantes ou limpe publicações antigas.</p>
       
       <form onsubmit="handlePublishNews(event)">
         <div class="form-group">
@@ -627,7 +630,47 @@
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const today = new Date();
       dateElement.textContent = today.toLocaleDateString('pt-PT', options);
+
+      loadWorldNewsTicker(
+        "https://feeds.bbci.co.uk/portuguese/rss.xml",
+        "intlTickerTrack",
+        "BBC BRASIL",
+        "<strong>MUNDO:</strong> Acompanhamento das principais notícias internacionais em direto na TGB."
+      );
+
+      loadWorldNewsTicker(
+        "https://feeds.bbci.co.uk/sport/rss.xml",
+        "sportsTickerTrack",
+        "BBC SPORT",
+        "<strong>DESPORTO:</strong> Resultados e novidades do desporto mundial em destaque."
+      );
     });
+
+    async function loadWorldNewsTicker(rssUrl, trackId, sourceLabel, fallbackHtml) {
+      const track = document.getElementById(trackId);
+      if (!track) return;
+
+      try {
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error("Falha ao obter feed");
+
+        const data = await response.json();
+        if (!data.items || data.items.length === 0) throw new Error("Sem itens");
+
+        track.innerHTML = "";
+        data.items.slice(0, 8).forEach((item) => {
+          const span = document.createElement("span");
+          span.className = "ticker-item";
+          const safeTitle = (item.title || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          const safeLink = item.link || "#noticias";
+          span.innerHTML = `<strong>${sourceLabel}:</strong> <a href="${safeLink}" target="_blank" rel="noopener noreferrer">${safeTitle}</a>`;
+          track.appendChild(span);
+        });
+      } catch (err) {
+        track.innerHTML = `<span class="ticker-item">${fallbackHtml}</span>`;
+      }
+    }
 
     function handleGlobalUnlock(event) {
       event.preventDefault();
