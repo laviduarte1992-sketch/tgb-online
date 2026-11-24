@@ -216,10 +216,22 @@
     .news-card h3 { margin: 10px 0; font-size: 18px; }
     .news-card p { font-size: 14px; color: #666; line-height: 1.4; }
 
-    /* Barra de Notícias Internacionais Deslizante (Estilo BBC/CNN) */
+    /* Barras Deslizantes de Notícias (Internacional e Desporto) */
     .intl-ticker-bar {
       margin-top: 30px;
       background: var(--tgb-dark);
+      color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      border-left: 5px solid var(--tgb-yellow);
+    }
+
+    .sports-ticker-bar {
+      margin-top: 14px;
+      background: #181c1a;
       color: white;
       border-radius: 8px;
       overflow: hidden;
@@ -244,6 +256,11 @@
       z-index: 2;
     }
 
+    .ticker-label-sports {
+      background: var(--tgb-green);
+      color: white;
+    }
+
     .ticker-track-wrapper {
       overflow: hidden;
       width: 100%;
@@ -257,7 +274,12 @@
       animation: tickerSlide 32s linear infinite;
     }
 
-    .intl-ticker-bar:hover .ticker-track {
+    .ticker-track-sports {
+      animation: tickerSlide 28s linear infinite;
+    }
+
+    .intl-ticker-bar:hover .ticker-track,
+    .sports-ticker-bar:hover .ticker-track {
       animation-play-state: paused;
     }
 
@@ -271,6 +293,10 @@
     .ticker-item strong {
       color: var(--tgb-yellow);
       margin-right: 6px;
+    }
+
+    .sports-ticker-bar .ticker-item strong {
+      color: #52e39c;
     }
 
     @keyframes tickerSlide {
@@ -494,6 +520,21 @@
         </div>
       </div>
     </div>
+
+    <!-- BARRA DESLIZANTE DE DESPORTO -->
+    <div class="sports-ticker-bar">
+      <div class="ticker-label ticker-label-sports">
+        <i class="fa-solid fa-futbol"></i> DESPORTO
+      </div>
+      <div class="ticker-track-wrapper">
+        <div class="ticker-track ticker-track-sports" id="sportsTickerTrack">
+          <span class="ticker-item"><strong>DJURTUS:</strong> Seleção nacional prepara próximos compromissos internacionais com foco na exibição em Bissau.</span>
+          <span class="ticker-item"><strong>CAMPEONATO NACIONAL:</strong> Clubes guineenses intensificam treinos para mais uma jornada emocionante.</span>
+          <span class="ticker-item"><strong>ATLETISMO & MODALIDADES:</strong> Jovens talentos da Guiné-Bissau em destaque nas formações desportivas.</span>
+          <span class="ticker-item"><strong>FUTEBOL AFRICANO:</strong> Resumo das principais provas continentais e atuações de atletas guineenses no estrangeiro.</span>
+        </div>
+      </div>
+    </div>
   </section>
 
   <footer id="contacto" class="footer">
@@ -536,7 +577,7 @@
     <div class="modal-box">
       <span class="close-btn" onclick="closeModal('adminModal')">&times;</span>
       <h3 style="margin-bottom: 15px; color: var(--tgb-dark);"><i class="fa-solid fa-pen-to-square"></i> Painel da Redação - Publicar & Gestão</h3>
-      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Publique novos conteúdos, atualize o ticker internacional ou limpe publicações antigas.</p>
+      <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Publique novos conteúdos, atualize as barras deslizantes ou limpe publicações antigas.</p>
       
       <form onsubmit="handlePublishNews(event)">
         <div class="form-group">
@@ -556,6 +597,7 @@
             <option value="Economia">Economia</option>
             <option value="Cultura">Cultura</option>
             <option value="Desporto">Desporto</option>
+            <option value="DesportoTicker">Desporto (Barra Deslizante)</option>
             <option value="Política">Política</option>
             <option value="Internacional">Internacional (Barra Deslizante)</option>
           </select>
@@ -672,15 +714,19 @@
         document.getElementById('streamDesc').textContent = content;
       }
 
-      // Se a categoria escolhida for "Internacional", adiciona à barra deslizante em movimento
       if (category === 'Internacional') {
         const tickerTrack = document.getElementById('intlTickerTrack');
         const newTickerItem = document.createElement('span');
         newTickerItem.className = 'ticker-item';
         newTickerItem.innerHTML = `<strong>${title.toUpperCase()}:</strong> ${content}`;
         tickerTrack.prepend(newTickerItem);
+      } else if (category === 'DesportoTicker') {
+        const sportsTrack = document.getElementById('sportsTickerTrack');
+        const newSportsItem = document.createElement('span');
+        newSportsItem.className = 'ticker-item';
+        newSportsItem.innerHTML = `<strong>${title.toUpperCase()}:</strong> ${content}`;
+        sportsTrack.prepend(newSportsItem);
       } else {
-        // Caso contrário, cria um cartão na grelha principal
         const newsGrid = document.getElementById('newsGrid');
         const newCard = document.createElement('article');
         newCard.className = 'news-card';
