@@ -551,6 +551,7 @@
       <div class="news-filters" id="newsFilters">
         <button class="filter-btn active" onclick="filterNews('all', this)">Todas</button>
         <button class="filter-btn" onclick="filterNews('agora', this)">Agora / Recentes</button>
+        <button class="filter-btn" onclick="filterNews('7dias', this)">Últimos 7 Dias</button>
         <button class="filter-btn" onclick="filterNews('anteriores', this)">Anteriores</button>
         <button class="filter-btn" onclick="filterNews('Sociedade', this)">Sociedade</button>
         <button class="filter-btn" onclick="filterNews('Economia', this)">Economia</button>
@@ -559,43 +560,7 @@
     </div>
 
     <div class="news-grid" id="newsGrid">
-      
-      <article class="news-card" data-category="Sociedade" data-period="agora" onclick="openArticleModal(this)">
-        <div class="news-img red-bg" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
-        <div class="news-content">
-          <div class="news-meta-top">
-            <span class="news-tag green-bg">Sociedade</span>
-            <span class="time-stamp"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> AGORA</span>
-          </div>
-          <h3>Modernização da Rede de Emissão em Bissau</h3>
-          <p>Novos equipamentos prometem expandir o sinal da TGB para todas as regiões do país.</p>
-        </div>
-      </article>
-
-      <article class="news-card" data-category="Economia" data-period="anteriores" onclick="openArticleModal(this)">
-        <div class="news-img yellow-bg" style="display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold; font-size:24px;">TGB NEWS</div>
-        <div class="news-content">
-          <div class="news-meta-top">
-            <span class="news-tag red-bg">Economia</span>
-            <span class="time-stamp older"><i class="fa-regular fa-clock"></i> Anterior · Há 2h</span>
-          </div>
-          <h3>Desenvolvimento Agrícola e Exportações</h3>
-          <p>Balanço das novas medidas de apoio aos produtores locais guineenses.</p>
-        </div>
-      </article>
-
-      <article class="news-card" data-category="Cultura" data-period="anteriores" onclick="openArticleModal(this)">
-        <div class="news-img green-bg" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
-        <div class="news-content">
-          <div class="news-meta-top">
-            <span class="news-tag yellow-bg" style="color:#000;">Cultura</span>
-            <span class="time-stamp older"><i class="fa-regular fa-clock"></i> Anterior · Ontem</span>
-          </div>
-          <h3>Festival Cultural Nacional na Capital</h3>
-          <p>Música, dança e tradições guineenses em destaque este fim de semana.</p>
-        </div>
-      </article>
-
+      <!-- Cartões carregados dinamicamente com datas reais e histórico dos últimos 7 dias -->
     </div>
 
     <!-- BARRA DESLIZANTE DE NOTÍCIAS INTERNACIONAIS DE TODO O MUNDO -->
@@ -709,7 +674,10 @@
 
       <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;">
       
-      <h4 style="margin-bottom: 10px; font-size: 15px; color: var(--tgb-red);"><i class="fa-solid fa-trash-can"></i> Gerir Conteúdos Ativos</h4>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+        <h4 style="font-size: 15px; color: var(--tgb-red);"><i class="fa-solid fa-trash-can"></i> Gerir Conteúdos Ativos</h4>
+        <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="resetDefaultNews()">Repor 7 Dias Base</button>
+      </div>
       <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Clique em "Remover" para apagar imediatamente uma notícia do site:</p>
       <div id="adminNewsList" style="max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 4px;">
         <!-- Lista gerada automaticamente -->
@@ -718,11 +686,177 @@
   </div>
 
   <script>
+    const STORAGE_KEY = "tgb_news_items_v1";
+    let currentFilterCriteria = "all";
+
+    function createInitialNews(nowMs) {
+      const hour = 3600000;
+      const day = 86400000;
+      return [
+        {
+          id: "n-1",
+          title: "Modernização da Rede de Emissão em Bissau",
+          category: "Sociedade",
+          content: "Novos equipamentos prometem expandir o sinal da TGB para todas as regiões do país com maior estabilidade e cobertura nacional.",
+          publishedAt: nowMs - (25 * 60000),
+          isNow: true
+        },
+        {
+          id: "n-2",
+          title: "Desenvolvimento Agrícola e Exportações",
+          category: "Economia",
+          content: "Balanço das novas medidas de apoio aos produtores locais guineenses e reforço das cadeias de exportação.",
+          publishedAt: nowMs - (2 * day),
+          isNow: false
+        },
+        {
+          id: "n-3",
+          title: "Festival Cultural Nacional na Capital",
+          category: "Cultura",
+          content: "Música, dança e tradições guineenses em destaque com delegações de várias regiões do país.",
+          publishedAt: nowMs - (4 * day),
+          isNow: false
+        },
+        {
+          id: "n-4",
+          title: "Programa de Saúde Comunitária nas Regiões",
+          category: "Sociedade",
+          content: "Equipas móveis reforçam consultas de prevenção e assistência sanitária fora da capital.",
+          publishedAt: nowMs - (6 * day),
+          isNow: false
+        },
+        {
+          id: "n-5",
+          title: "Reabilitação de Infraestruturas Locais",
+          category: "Economia",
+          content: "Arquivo de obras públicas e projetos de ligação rodoviária concluídos há mais de uma semana.",
+          publishedAt: nowMs - (12 * day),
+          isNow: false
+        }
+      ];
+    }
+
+    function loadStoredNews() {
+      const nowMs = Date.now();
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch (e) {}
+      const initial = createInitialNews(nowMs);
+      saveStoredNews(initial);
+      return initial;
+    }
+
+    function saveStoredNews(items) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      } catch (e) {}
+    }
+
+    function resetDefaultNews() {
+      const initial = createInitialNews(Date.now());
+      saveStoredNews(initial);
+      renderNewsCards();
+      updateAdminNewsList();
+    }
+
+    function formatRelativeTime(publishedAt, isNow) {
+      const nowMs = Date.now();
+      const diffMs = Math.max(0, nowMs - publishedAt);
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (isNow || diffMins < 60) {
+        const timeStr = new Date(publishedAt).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+        return { text: `AGORA · ${timeStr}`, isRecent: true };
+      }
+      if (diffHours < 24) {
+        return { text: `Há ${diffHours}h`, isRecent: true };
+      }
+      if (diffDays === 1) {
+        return { text: `Ontem (Há 1 dia)`, isRecent: false };
+      }
+      if (diffDays <= 7) {
+        return { text: `Há ${diffDays} dias`, isRecent: false };
+      }
+      const dateStr = new Date(publishedAt).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
+      return { text: `Anterior · ${dateStr}`, isRecent: false };
+    }
+
+    function renderNewsCards() {
+      const newsGrid = document.getElementById("newsGrid");
+      if (!newsGrid) return;
+
+      const items = loadStoredNews().sort((a, b) => b.publishedAt - a.publishedAt);
+      const nowMs = Date.now();
+      const sevenDaysMs = 7 * 86400000;
+      const oneDayMs = 86400000;
+
+      newsGrid.innerHTML = "";
+
+      items.forEach((item) => {
+        const ageMs = nowMs - item.publishedAt;
+        const isLast7Days = ageMs <= sevenDaysMs;
+        const isRecentPeriod = item.isNow || ageMs <= oneDayMs;
+        const periodAttr = isRecentPeriod ? "agora" : "anteriores";
+
+        let visible = true;
+        if (currentFilterCriteria === "agora") {
+          visible = isRecentPeriod;
+        } else if (currentFilterCriteria === "7dias") {
+          visible = isLast7Days;
+        } else if (currentFilterCriteria === "anteriores") {
+          visible = !isRecentPeriod;
+        } else if (currentFilterCriteria !== "all") {
+          visible = item.category === currentFilterCriteria;
+        }
+
+        let tagClass = "green-bg";
+        let headerBg = "green-bg";
+        if (item.category === "Economia") { tagClass = "red-bg"; headerBg = "red-bg"; }
+        if (item.category === "Cultura") { tagClass = "yellow-bg"; headerBg = "yellow-bg"; }
+
+        const stampInfo = formatRelativeTime(item.publishedAt, item.isNow);
+        const stampClass = stampInfo.isRecent ? "time-stamp" : "time-stamp older";
+        const stampIcon = stampInfo.isRecent
+          ? `<i class="fa-solid fa-circle" style="font-size: 8px;"></i>`
+          : `<i class="fa-regular fa-clock"></i>`;
+
+        const card = document.createElement("article");
+        card.className = "news-card";
+        card.style.display = visible ? "" : "none";
+        card.setAttribute("data-category", item.category);
+        card.setAttribute("data-period", periodAttr);
+        card.setAttribute("data-7days", isLast7Days ? "1" : "0");
+        card.onclick = function () { openArticleModal(this); };
+
+        card.innerHTML = `
+          <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
+          <div class="news-content">
+            <div class="news-meta-top">
+              <span class="news-tag ${tagClass}">${item.category}</span>
+              <span class="${stampClass}">${stampIcon} ${stampInfo.text}</span>
+            </div>
+            <h3>${item.title}</h3>
+            <p>${item.content}</p>
+          </div>
+        `;
+
+        newsGrid.appendChild(card);
+      });
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const dateElement = document.getElementById("current-date");
       const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
       const today = new Date();
       dateElement.textContent = today.toLocaleDateString('pt-PT', options);
+
+      renderNewsCards();
 
       const worldSources = [
         { url: "https://www.rtp.pt/noticias/rss/mundo", label: "RTP MUNDO" },
@@ -751,24 +885,12 @@
     });
 
     function filterNews(criteria, btnElement) {
+      currentFilterCriteria = criteria;
       document.querySelectorAll('#newsFilters .filter-btn').forEach((btn) => {
         btn.classList.remove('active');
       });
       if (btnElement) btnElement.classList.add('active');
-
-      const cards = document.querySelectorAll('#newsGrid .news-card');
-      cards.forEach((card) => {
-        const cat = card.getAttribute('data-category');
-        const period = card.getAttribute('data-period');
-
-        if (criteria === 'all') {
-          card.style.display = '';
-        } else if (criteria === 'agora' || criteria === 'anteriores') {
-          card.style.display = (period === criteria) ? '' : 'none';
-        } else {
-          card.style.display = (cat === criteria) ? '' : 'none';
-        }
-      });
+      renderNewsCards();
     }
 
     function openArticleModal(cardElement) {
@@ -868,31 +990,29 @@
     function updateAdminNewsList() {
       const listContainer = document.getElementById('adminNewsList');
       listContainer.innerHTML = '';
-      const cards = document.querySelectorAll('.news-grid .news-card');
+      const items = loadStoredNews().sort((a, b) => b.publishedAt - a.publishedAt);
 
-      if (cards.length === 0) {
+      if (items.length === 0) {
         listContainer.innerHTML = '<p style="font-size:12px; color:#888;">Nenhuma notícia publicada.</p>';
         return;
       }
 
-      cards.forEach((card, index) => {
-        const title = card.querySelector('h3').textContent;
+      items.forEach((item) => {
         const itemDiv = document.createElement('div');
         itemDiv.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; border-bottom: 1px solid #f0f0f0; padding-bottom: 5px;";
         itemDiv.innerHTML = `
-          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">${title}</span>
-          <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px;" onclick="removeCardAndRefresh(${index})">Remover</button>
+          <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">${item.title}</span>
+          <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px;" onclick="removeCardAndRefresh('${item.id}')">Remover</button>
         `;
         listContainer.appendChild(itemDiv);
       });
     }
 
-    function removeCardAndRefresh(index) {
-      const cards = document.querySelectorAll('.news-grid .news-card');
-      if (cards[index]) {
-        cards[index].remove();
-        updateAdminNewsList();
-      }
+    function removeCardAndRefresh(id) {
+      const updated = loadStoredNews().filter((item) => item.id !== id);
+      saveStoredNews(updated);
+      renderNewsCards();
+      updateAdminNewsList();
     }
 
     function extractYouTubeId(url) {
@@ -900,20 +1020,6 @@
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
       const match = url.match(regExp);
       return (match && match[2].length === 11) ? match[2] : url;
-    }
-
-    function demotePreviousNowBadges() {
-      document.querySelectorAll('#newsGrid .news-card').forEach((card) => {
-        card.setAttribute('data-period', 'anteriores');
-        const stamp = card.querySelector('.time-stamp');
-        if (stamp) {
-          stamp.classList.add('older');
-          const currentText = stamp.textContent.trim();
-          if (currentText.includes('AGORA')) {
-            stamp.innerHTML = `<i class="fa-regular fa-clock"></i> Anterior`;
-          }
-        }
-      });
     }
 
     function handlePublishNews(event) {
@@ -944,34 +1050,18 @@
         newSportsItem.innerHTML = `<strong>${title.toUpperCase()}:</strong> ${content}`;
         sportsTrack.prepend(newSportsItem);
       } else {
-        demotePreviousNowBadges();
-
-        const nowTime = new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-        const newsGrid = document.getElementById('newsGrid');
-        const newCard = document.createElement('article');
-        newCard.className = 'news-card';
-        newCard.setAttribute('data-category', category);
-        newCard.setAttribute('data-period', 'agora');
-        newCard.setAttribute('onclick', 'openArticleModal(this)');
-        
-        let tagClass = 'green-bg';
-        let headerBg = 'green-bg';
-        if(category === 'Economia') { tagClass = 'red-bg'; headerBg = 'red-bg'; }
-        if(category === 'Cultura') { tagClass = 'yellow-bg'; headerBg = 'yellow-bg'; }
-
-        newCard.innerHTML = `
-          <div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; font-size:24px;">TGB NEWS</div>
-          <div class="news-content">
-            <div class="news-meta-top">
-              <span class="news-tag ${tagClass}">${category}</span>
-              <span class="time-stamp"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> AGORA · ${nowTime}</span>
-            </div>
-            <h3>${title}</h3>
-            <p>${content}</p>
-          </div>
-        `;
-
-        newsGrid.insertBefore(newCard, newsGrid.firstChild);
+        const items = loadStoredNews().map((item) => ({ ...item, isNow: false }));
+        items.unshift({
+          id: "n-" + Date.now(),
+          title,
+          category,
+          content,
+          publishedAt: Date.now(),
+          isNow: true
+        });
+        saveStoredNews(items);
+        renderNewsCards();
+        updateAdminNewsList();
       }
       
       alert("Conteúdo publicado com sucesso!");
