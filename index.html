@@ -292,6 +292,69 @@
       background: var(--tgb-red);
     }
 
+    /* Painel de Resultados da Pesquisa */
+    .search-results-box {
+      display: none;
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+      border-left: 5px solid var(--tgb-red);
+    }
+
+    .search-results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--tgb-dark);
+    }
+
+    .search-result-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .search-result-item {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #f8f9fc;
+      border: 1px solid #e6e8f0;
+      cursor: pointer;
+      text-decoration: none;
+      color: #222;
+      transition: 0.2s;
+    }
+
+    .search-result-item:hover {
+      border-color: var(--tgb-red);
+      background: #fff8f8;
+    }
+
+    .search-result-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--tgb-dark);
+    }
+
+    .search-result-meta {
+      font-size: 12px;
+      color: #666;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .news-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -791,7 +854,7 @@
         <input
           type="text"
           id="newsSearchInput"
-          placeholder="Pesquisar notícias..."
+          placeholder="Pesquisar qualquer notícia..."
           oninput="handleSearchInput(this.value)"
         >
         <button
@@ -803,6 +866,15 @@
         >&times;</button>
         <button type="submit" class="search-submit-btn">Pesquisar</button>
       </form>
+    </div>
+
+    <!-- RESULTADOS DA PESQUISA (NOTÍCIAS TGB, ARQUIVO E FONTES GLOBAIS) -->
+    <div class="search-results-box" id="searchResultsBox">
+      <div class="search-results-header">
+        <span id="searchResultsSummary">Resultados da pesquisa</span>
+        <button type="button" class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px;" onclick="clearNewsSearch()">Fechar Pesquisa</button>
+      </div>
+      <div class="search-result-list" id="searchResultsList"></div>
     </div>
 
     <div class="news-grid" id="newsGrid">
@@ -998,6 +1070,7 @@
     const STORAGE_KEY = "tgb_news_items_v3";
     let currentFilterCriteria = "all";
     let currentSearchQuery = "";
+    let globalTickerArticles = [];
 
     function createInitialNews(nowMs) {
       const day = 86400000;
@@ -1110,11 +1183,10 @@
       return { text: `Anterior · ${dateStr}`, shortAge: `>${dateStr}`, isRecent: false };
     }
 
-    function matchesSearch(item, stampText) {
+    function matchesSearchText(text) {
       const q = currentSearchQuery.trim().toLowerCase();
       if (!q) return true;
-      const haystack = `${item.title} ${item.category} ${item.content} ${stampText}`.toLowerCase();
-      return haystack.includes(q);
+      return (text || "").toLowerCase().includes(q);
     }
 
     function handleSearchInput(value) {
@@ -1142,6 +1214,87 @@
       return `<div class="news-img ${headerBg}" style="display:flex; align-items:center; justify-content:center; color:${textColor}; font-weight:bold; font-size:24px;">TGB NEWS</div>`;
     }
 
+    function renderSearchResultsPanel(localItems, stampById) {
+      const box = document.getElementById("searchResultsBox");
+      const listEl = document.getElementById("searchResultsList");
+      const summaryEl = document.getElementById("searchResultsSummary");
+      if (!box || !listEl || !summaryEl) return;
+
+      const trimmed = currentSearchQuery.trim();
+      if (!trimmed) {
+        box.style.display = "none";
+        listEl.innerHTML = "";
+        return;
+      }
+
+      const localMatches = localItems.filter((item) => {
+        const stampText = stampById[item.id] ? stampById[item.id].text : "";
+        return matchesSearchText(`${item.title} ${item.category} ${item.content} ${stampText}`);
+      });
+
+      const externalMatches = globalTickerArticles.filter((art) =>
+        matchesSearchText(`${art.title} ${art.source} ${art.section}`)
+      );
+
+      const totalCount = localMatches.length + externalMatches.length;
+      box.style.display = "block";
+      summaryEl.textContent = totalCount > 0
+        ? `Encontrados ${totalCount} resultado(s) para "${trimmed}"`
+        : `Nenhum resultado encontrado para "${trimmed}".`;
+
+      listEl.innerHTML = "";
+
+      localMatches.forEach((item) => {
+        const stampInfo = stampById[item.id];
+        let tagClass = "green-bg";
+        if (item.category === "Economia") tagClass = "red-bg";
+        if (item.category === "Cultura") tagClass = "yellow-bg";
+
+        const row = document.createElement("div");
+        row.className = "search-result-item";
+        row.onclick = function () {
+          openArticleModalByData(
+            item,
+            stampInfo.text,
+            tagClass,
+            stampInfo.isRecent ? "time-stamp" : "time-stamp older",
+            stampInfo.isRecent
+              ? `<i class="fa-solid fa-circle" style="font-size: 8px;"></i>`
+              : `<i class="fa-regular fa-clock"></i>`
+          );
+        };
+        row.innerHTML = `
+          <div>
+            <div class="search-result-title">${item.title}</div>
+            <div style="font-size:12px; color:#666; margin-top:3px;">${item.content}</div>
+          </div>
+          <div class="search-result-meta">
+            <span class="news-tag ${tagClass}">${item.category}</span>
+            <span>${stampInfo.text}</span>
+            <i class="fa-solid fa-up-right-from-square" style="color:var(--tgb-green);"></i>
+          </div>
+        `;
+        listEl.appendChild(row);
+      });
+
+      externalMatches.slice(0, 8).forEach((art) => {
+        const linkEl = document.createElement("a");
+        linkEl.className = "search-result-item";
+        linkEl.href = art.link || "#noticias";
+        linkEl.target = "_blank";
+        linkEl.rel = "noopener noreferrer";
+        linkEl.innerHTML = `
+          <div class="search-result-title">${art.title}</div>
+          <div class="search-result-meta">
+            <span class="news-tag ${art.section === "DESPORTO" ? "green-bg" : "red-bg"}">${art.source}</span>
+            <span>${art.section}</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </div>
+        `;
+        listEl.appendChild(linkEl);
+      });
+    }
+
     function renderNewsLayout() {
       const newsGrid = document.getElementById("newsGrid");
       const pastPills = document.getElementById("pastNewsPills");
@@ -1152,6 +1305,7 @@
       const oneDayMs = 86400000;
       const sevenDaysMs = 7 * 86400000;
       const hasSearch = currentSearchQuery.trim().length > 0;
+      const stampById = {};
 
       newsGrid.innerHTML = "";
       pastPills.innerHTML = "";
@@ -1165,10 +1319,7 @@
         const isOlderThan24h = !item.isNow && ageMs > oneDayMs;
 
         const stampInfo = formatRelativeTime(item.publishedAt, item.isNow);
-
-        if (!matchesSearch(item, stampInfo.text)) {
-          return;
-        }
+        stampById[item.id] = stampInfo;
 
         let tagClass = "green-bg";
         let headerBg = "green-bg";
@@ -1177,10 +1328,11 @@
         if (item.category === "Cultura") { tagClass = "yellow-bg"; headerBg = "yellow-bg"; textColor = "#000"; }
 
         const belongsInPastStrip = isOlderThan24h;
+        const matchesQuery = !hasSearch || matchesSearchText(`${item.title} ${item.category} ${item.content} ${stampInfo.text}`);
 
         let showInMainGrid = false;
         if (hasSearch) {
-          showInMainGrid = true;
+          showInMainGrid = matchesQuery;
         } else if (currentFilterCriteria === "all") {
           showInMainGrid = !belongsInPastStrip && mainCount < 3;
         } else if (currentFilterCriteria === "agora") {
@@ -1226,7 +1378,7 @@
           newsGrid.appendChild(card);
         }
 
-        if (belongsInPastStrip) {
+        if (belongsInPastStrip && matchesQuery) {
           const pill = document.createElement("button");
           pill.type = "button";
           pill.className = "archive-pill";
@@ -1247,16 +1399,15 @@
         }
       });
 
-      if (mainCount === 0) {
-        const msg = hasSearch
-          ? `Nenhuma notícia encontrada para "${currentSearchQuery.trim()}".`
-          : "Nenhuma notícia encontrada para este filtro.";
-        newsGrid.innerHTML = `<p style="color:#666; font-size:14px;">${msg}</p>`;
+      if (mainCount === 0 && !hasSearch) {
+        newsGrid.innerHTML = `<p style="color:#666; font-size:14px;">Nenhuma notícia encontrada para este filtro.</p>`;
       }
 
       if (pastPills.children.length === 0) {
         pastPills.innerHTML = `<span style="font-size:13px; color:#777;">Sem notícias anteriores correspondentes neste momento.</span>`;
       }
+
+      renderSearchResultsPanel(items, stampById);
     }
 
     function openArticleModalByData(item, stampText, tagClass, stampClass, stampIcon) {
@@ -1298,12 +1449,14 @@
       loadMultiSourceTicker(
         worldSources,
         "intlTickerTrack",
+        "INTERNACIONAL",
         "<strong>MUNDO:</strong> Acompanhamento das principais notícias internacionais em direto na TGB."
       );
 
       loadMultiSourceTicker(
         sportsSources,
         "sportsTickerTrack",
+        "DESPORTO",
         "<strong>DESPORTO:</strong> Resultados e novidades do desporto mundial em destaque."
       );
     });
@@ -1317,7 +1470,7 @@
       renderNewsLayout();
     }
 
-    async function loadMultiSourceTicker(sources, trackId, fallbackHtml) {
+    async function loadMultiSourceTicker(sources, trackId, sectionLabel, fallbackHtml) {
       const track = document.getElementById(trackId);
       if (!track) return;
 
@@ -1328,8 +1481,9 @@
           if (!response.ok) throw new Error("Falha ao obter feed");
           const data = await response.json();
           if (!data.items || data.items.length === 0) throw new Error("Sem itens");
-          return data.items.slice(0, 4).map((item) => ({
+          return data.items.slice(0, 5).map((item) => ({
             source: src.label,
+            section: sectionLabel,
             title: item.title || "",
             link: item.link || "#noticias"
           }));
@@ -1353,6 +1507,10 @@
         }
       }
 
+      globalTickerArticles = globalTickerArticles
+        .filter((a) => a.section !== sectionLabel)
+        .concat(mixedItems);
+
       track.innerHTML = "";
       mixedItems.forEach((item) => {
         const span = document.createElement("span");
@@ -1361,6 +1519,10 @@
         span.innerHTML = `<strong>${item.source}:</strong> <a href="${item.link}" target="_blank" rel="noopener noreferrer">${safeTitle}</a>`;
         track.appendChild(span);
       });
+
+      if (currentSearchQuery.trim().length > 0) {
+        renderNewsLayout();
+      }
     }
 
     function handleGlobalUnlock(event) {
