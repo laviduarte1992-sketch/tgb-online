@@ -184,13 +184,22 @@
       justify-content: space-between;
       align-items: center;
       gap: 15px;
-      margin-bottom: 25px;
+      margin-bottom: 18px;
     }
 
     .section-title {
       border-left: 5px solid var(--tgb-green);
       padding-left: 10px;
       margin-bottom: 0;
+    }
+
+    .news-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
     }
 
     .news-filters {
@@ -215,6 +224,68 @@
       background: var(--tgb-red);
       color: white;
       border-color: var(--tgb-red);
+    }
+
+    /* Barra de Pesquisa no Canto Direito do Portal */
+    .news-search-box {
+      display: flex;
+      align-items: center;
+      background: white;
+      border: 1px solid #d5d7e0;
+      border-radius: 999px;
+      padding: 4px 6px 4px 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      min-width: 260px;
+      margin-left: auto;
+    }
+
+    .news-search-box:focus-within {
+      border-color: var(--tgb-red);
+    }
+
+    .news-search-box i.fa-magnifying-glass {
+      color: #666;
+      font-size: 13px;
+      margin-right: 8px;
+    }
+
+    .news-search-box input {
+      border: none;
+      outline: none;
+      font-size: 13px;
+      width: 100%;
+      min-width: 150px;
+      color: #222;
+      background: transparent;
+    }
+
+    .search-clear-btn {
+      background: transparent;
+      border: none;
+      color: #777;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .search-clear-btn:hover {
+      color: var(--tgb-red);
+    }
+
+    .search-submit-btn {
+      background: var(--tgb-dark);
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 6px 13px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .search-submit-btn:hover {
+      background: var(--tgb-red);
     }
 
     .news-grid {
@@ -617,6 +688,9 @@
   <section id="noticias" class="news-section container">
     <div class="news-header-row">
       <h2 class="section-title">Últimas Notícias</h2>
+    </div>
+
+    <div class="news-toolbar">
       <div class="news-filters" id="newsFilters">
         <button class="filter-btn active" onclick="filterNews('all', this)">Destaques</button>
         <button class="filter-btn" onclick="filterNews('agora', this)">Agora / Hoje</button>
@@ -626,6 +700,24 @@
         <button class="filter-btn" onclick="filterNews('Economia', this)">Economia</button>
         <button class="filter-btn" onclick="filterNews('Cultura', this)">Cultura</button>
       </div>
+
+      <form class="news-search-box" onsubmit="handleSearchSubmit(event)" role="search" aria-label="Pesquisar notícias">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input
+          type="text"
+          id="newsSearchInput"
+          placeholder="Pesquisar notícias..."
+          oninput="handleSearchInput(this.value)"
+        >
+        <button
+          type="button"
+          id="searchClearBtn"
+          class="search-clear-btn"
+          title="Limpar pesquisa"
+          onclick="clearNewsSearch()"
+        >&times;</button>
+        <button type="submit" class="search-submit-btn">Pesquisar</button>
+      </form>
     </div>
 
     <div class="news-grid" id="newsGrid">
@@ -771,6 +863,7 @@
   <script>
     const STORAGE_KEY = "tgb_news_items_v2";
     let currentFilterCriteria = "all";
+    let currentSearchQuery = "";
 
     function createInitialNews(nowMs) {
       const day = 86400000;
@@ -877,6 +970,34 @@
       return { text: `Anterior · ${dateStr}`, shortAge: `>${dateStr}`, isRecent: false };
     }
 
+    function matchesSearch(item, stampText) {
+      const q = currentSearchQuery.trim().toLowerCase();
+      if (!q) return true;
+      const haystack = `${item.title} ${item.category} ${item.content} ${stampText}`.toLowerCase();
+      return haystack.includes(q);
+    }
+
+    function handleSearchInput(value) {
+      currentSearchQuery = value || "";
+      const clearBtn = document.getElementById("searchClearBtn");
+      if (clearBtn) {
+        clearBtn.style.display = currentSearchQuery.trim() ? "inline-block" : "none";
+      }
+      renderNewsLayout();
+    }
+
+    function handleSearchSubmit(event) {
+      event.preventDefault();
+      const inputEl = document.getElementById("newsSearchInput");
+      handleSearchInput(inputEl ? inputEl.value : "");
+    }
+
+    function clearNewsSearch() {
+      const inputEl = document.getElementById("newsSearchInput");
+      if (inputEl) inputEl.value = "";
+      handleSearchInput("");
+    }
+
     function renderNewsLayout() {
       const newsGrid = document.getElementById("newsGrid");
       const pastPills = document.getElementById("pastNewsPills");
@@ -886,6 +1007,7 @@
       const nowMs = Date.now();
       const oneDayMs = 86400000;
       const sevenDaysMs = 7 * 86400000;
+      const hasSearch = currentSearchQuery.trim().length > 0;
 
       newsGrid.innerHTML = "";
       pastPills.innerHTML = "";
@@ -900,16 +1022,21 @@
 
         const stampInfo = formatRelativeTime(item.publishedAt, item.isNow);
 
+        if (!matchesSearch(item, stampInfo.text)) {
+          return;
+        }
+
         let tagClass = "green-bg";
         let headerBg = "green-bg";
         if (item.category === "Economia") { tagClass = "red-bg"; headerBg = "red-bg"; }
         if (item.category === "Cultura") { tagClass = "yellow-bg"; headerBg = "yellow-bg"; }
 
-        // Notícias mais antigas (há vários dias ou mais de 7 dias) vão para o rodapé/faixa de arquivo
         const belongsInPastStrip = isOlderThan24h;
 
         let showInMainGrid = false;
-        if (currentFilterCriteria === "all") {
+        if (hasSearch) {
+          showInMainGrid = true;
+        } else if (currentFilterCriteria === "all") {
           showInMainGrid = !belongsInPastStrip && mainCount < 3;
         } else if (currentFilterCriteria === "agora") {
           showInMainGrid = !belongsInPastStrip;
@@ -970,11 +1097,14 @@
       });
 
       if (mainCount === 0) {
-        newsGrid.innerHTML = `<p style="color:#666; font-size:14px;">Nenhuma notícia encontrada para este filtro.</p>`;
+        const msg = hasSearch
+          ? `Nenhuma notícia encontrada para "${currentSearchQuery.trim()}".`
+          : "Nenhuma notícia encontrada para este filtro.";
+        newsGrid.innerHTML = `<p style="color:#666; font-size:14px;">${msg}</p>`;
       }
 
       if (pastPills.children.length === 0) {
-        pastPills.innerHTML = `<span style="font-size:13px; color:#777;">Sem notícias anteriores registadas neste momento.</span>`;
+        pastPills.innerHTML = `<span style="font-size:13px; color:#777;">Sem notícias anteriores correspondentes neste momento.</span>`;
       }
     }
 
